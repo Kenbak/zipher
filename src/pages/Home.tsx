@@ -37,52 +37,72 @@ export function Home() {
     loadTransactions();
   }, [webzjsState.currentAddress, webzjsState.lastSyncTime]); // Reload when sync completes
 
+  // Step 1: Initialize WebZjs WASM
   useEffect(() => {
-    const initWallet = async () => {
+    if (webzjsState.isInitialized || webzjsState.isInitializing) {
+      return;
+    }
+
+    console.log('[Home] Step 1: Initializing WebZjs WASM...');
+    initializeWebZjs().catch(err => {
+      console.error('[Home] WebZjs init failed:', err);
+      setError('Failed to initialize WebZjs: ' + err.message);
+      setIsLoading(false);
+    });
+  }, [webzjsState.isInitialized, webzjsState.isInitializing, initializeWebZjs]);
+
+  // Step 2: Create wallet ONLY after WebZjs is ready
+  useEffect(() => {
+    if (!webzjsState.isInitialized) {
+      console.log('[Home] Waiting for WebZjs initialization...');
+      return;
+    }
+
+    if (webzjsState.currentAddress) {
+      console.log('[Home] Address already available:', webzjsState.currentAddress);
+      setAddress(webzjsState.currentAddress);
+      setIsLoading(false);
+      return;
+    }
+
+    const createWallet = async () => {
       try {
         setIsLoading(true);
-        console.log('[Home] Initializing wallet...');
+        console.log('[Home] Step 2: Creating wallet + syncing with CipherScan lightwalletd...');
+        console.log('[Home] ⏳ This may take 1-3 minutes (single-threaded)...');
 
-        // Check if already have address in context
-        if (webzjsState.currentAddress) {
-          console.log('[Home] Address already in context:', webzjsState.currentAddress);
-          setAddress(webzjsState.currentAddress);
-          setIsLoading(false);
-          return;
-        }
-
-        // Initialize WebZjs if needed
-        if (!webzjsState.isInitialized) {
-          console.log('[Home] Initializing WebZjs...');
-          await initializeWebZjs();
-        }
-
-        // Get vault (seed phrase) - already decrypted since user unlocked
         const vault = getVaultData();
         if (!vault || !vault.seedPhrase) {
           throw new Error('No seed phrase found. Please unlock wallet.');
         }
 
-        console.log('[Home] Creating wallet from seed...');
         const result = await createWalletFromSeed(
           vault.accountName || 'Account 1',
           vault.seedPhrase,
           0,
-          vault.birthdayHeight || 2800000
+          vault.birthdayHeight || null
         );
 
-        console.log('[Home] ✅ Wallet created! Address:', result.address);
+        console.log('[Home] ✅ Wallet synced! Address:', result.address);
         setAddress(result.address);
+
       } catch (err) {
-        console.error('[Home] Failed to initialize wallet:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load wallet');
+        console.error('[Home] Failed to create wallet:', err);
+
+        if (err instanceof Error && err.message.includes('eval')) {
+          setError('CSP Error: WebZjs single-threaded build failed.');
+        } else if (err instanceof Error && (err.message.includes('GRPC') || err.message.includes('504'))) {
+          setError('Network error: Cannot connect to CipherScan lightwalletd. Check server.');
+        } else {
+          setError(err instanceof Error ? err.message : 'Failed to create wallet');
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    initWallet();
-  }, [webzjsState.isInitialized, webzjsState.currentAddress, initializeWebZjs, createWalletFromSeed, setAddress]);
+    createWallet();
+  }, [webzjsState.isInitialized, webzjsState.currentAddress, createWalletFromSeed, setAddress]);
 
   const address = isLoading ? 'Loading...' : (walletAddress || 'No address');
 
@@ -111,6 +131,59 @@ export function Home() {
     if (addr.length <= 20) return addr;
     return `${addr.substring(0, 10)}...${addr.substring(addr.length - 8)}`;
   };
+
+  // Show loading screen during wallet initialization
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cipher-bg text-white flex flex-col items-center justify-center p-6">
+        <div className="text-center space-y-6 max-w-md">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-cipher-cyan mx-auto"></div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold">Initializing Wallet</h2>
+            <p className="text-gray-400">
+              WebZjs is syncing with the blockchain...
+            </p>
+            <p className="text-sm text-gray-500">
+              ⏳ This may take 1-5 minutes for the first sync
+            </p>
+            <p className="text-xs text-gray-600">
+              (Single-threaded mode for Chrome MV3 compatibility)
+            </p>
+          </div>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+              <p className="text-sm text-red-400">{error}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Show error screen if initialization failed
+  if (error && !walletAddress) {
+    return (
+      <div className="min-h-screen bg-cipher-bg text-white flex flex-col items-center justify-center p-6">
+        <div className="text-center space-y-6 max-w-md">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold">Initialization Failed</h2>
+            <p className="text-red-400">{error}</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-cipher-cyan hover:bg-cipher-cyan/90 text-cipher-bg font-semibold py-2 px-4 rounded-lg transition-colors"
+          >
+            Reload Extension
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cipher-bg text-white flex flex-col">

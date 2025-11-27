@@ -24,7 +24,8 @@ import initWebzJSWallet, {
   WebWallet,
 } from '@chainsafe/webzjs-wallet';
 
-const LIGHTWALLETD_URL = 'https://zcash-testnet.chainsafe.dev';
+// Use CipherScan's lightwalletd (gRPC-web proxy via Nginx on port 443)
+const LIGHTWALLETD_URL = 'https://lightwalletd.testnet.cipherscan.app';
 const NETWORK = 'test';
 const MIN_CONFIRMATIONS = 10;
 

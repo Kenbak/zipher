@@ -35,7 +35,8 @@
   "host_permissions": [
     "https://zcash-testnet.chainsafe.dev/*",
     "https://testnet.cipherscan.app/*",
-    "https://api.testnet.cipherscan.app/*"
+    "https://api.testnet.cipherscan.app/*",
+    "https://lightwalletd.testnet.cipherscan.app/*"
   ],
 
   "content_security_policy": {

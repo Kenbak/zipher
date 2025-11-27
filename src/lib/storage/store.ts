@@ -3,7 +3,8 @@
  */
 import { create } from 'zustand';
 
-export type Page =
+export type Page = 
+  | 'unlock'
   | 'welcome'
   | 'create-wallet'
   | 'confirm-seed'
@@ -30,7 +31,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   // Navigation
-  currentPage: 'welcome',
+  currentPage: 'unlock', // Start with unlock, will check if vault exists
   navigateTo: (page) => set({ currentPage: page }),
 
   // Onboarding state

@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
-import { getVaultData } from '@/lib/storage/secure-storage';
+import { useWalletState } from '@/lib/storage/wallet-state';
+import { getWalletAddress } from '@/lib/wallet-manager';
 
 export function Home() {
-  const [address, setAddress] = useState<string>('');
+  const walletAddress = useWalletState((state) => state.address);
+  const isInitialized = useWalletState((state) => state.isInitialized);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    // TODO: Get real address from WebZjs wallet
-    // For now, show a placeholder Unified Address
-    const vault = getVaultData();
-    if (vault) {
-      // Generate deterministic placeholder address from seed
-      const mockAddress = 'u1test' + vault.seedPhrase.substring(0, 20).replace(/\s/g, '').toLowerCase() + '...';
-      setAddress(mockAddress);
-    }
-  }, []);
+    // Address comes from Zustand store (set by wallet-manager)
+    console.log('[Home] Wallet initialized:', isInitialized);
+    console.log('[Home] Address:', walletAddress);
+  }, [isInitialized, walletAddress]);
+
+  const address = walletAddress || getWalletAddress() || 'Loading...';
 
   const handleCopyAddress = async () => {
     if (address) {
@@ -182,21 +181,21 @@ export function Home() {
             </svg>
             <span className="text-xs">Home</span>
           </button>
-          
+
           <button className="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-white transition-colors">
             <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
             </svg>
             <span className="text-xs">Swap</span>
           </button>
-          
+
           <button className="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-white transition-colors">
             <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span className="text-xs">Activity</span>
           </button>
-          
+
           <button className="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-white transition-colors">
             <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

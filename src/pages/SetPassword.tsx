@@ -56,11 +56,11 @@ export function SetPassword() {
     setIsCreating(true);
 
     try {
-      console.log('[SetPassword] Creating encrypted vault...');
-
+      console.log('[SetPassword] Step 1/3: Creating encrypted vault...');
+      
       // Import secure storage
       const { createVault } = await import('@/lib/storage/secure-storage');
-
+      
       // Create encrypted vault
       await createVault(password, {
         seedPhrase: seedPhrase,
@@ -68,16 +68,23 @@ export function SetPassword() {
         birthdayHeight: birthdayHeight,
         createdAt: Date.now(),
       });
-
-      console.log('[SetPassword] Vault created successfully!');
-      console.log('[SetPassword] Seed is encrypted with AES-256-GCM');
-      console.log('[SetPassword] Password is NOT stored (only encryption key derived from it)');
-
+      
+      console.log('[SetPassword] ✅ Vault created (seed encrypted with AES-256-GCM)');
+      
+      // Step 2: Initialize WebZjs and create wallet
+      console.log('[SetPassword] Step 2/3: Initializing WebZjs wallet...');
+      const { initializeWallet } = await import('@/lib/wallet-manager');
+      
+      await initializeWallet();
+      
+      console.log('[SetPassword] ✅ WebZjs wallet created with REAL address!');
+      console.log('[SetPassword] Step 3/3: Ready to use');
+      
       // Navigate to home
       navigateTo('home');
     } catch (err) {
       console.error('[SetPassword] Failed to create wallet:', err);
-      setError('Failed to create wallet. Please try again.');
+      setError(`Failed to create wallet: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsCreating(false);
     }

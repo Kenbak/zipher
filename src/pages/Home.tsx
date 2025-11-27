@@ -1,19 +1,65 @@
 import { useState, useEffect } from 'react';
 import { useWalletState } from '@/lib/storage/wallet-state';
-import { getWalletAddress } from '@/lib/wallet-manager';
+import { useWebZjs } from '@/context/WebzjsContext';
+import { getVaultData } from '@/lib/storage/secure-storage';
 
 export function Home() {
   const walletAddress = useWalletState((state) => state.address);
-  const isInitialized = useWalletState((state) => state.isInitialized);
+  const setAddress = useWalletState((state) => state.setAddress);
   const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+
+  const { state: webzjsState, createWalletFromSeed, initializeWebZjs } = useWebZjs();
 
   useEffect(() => {
-    // Address comes from Zustand store (set by wallet-manager)
-    console.log('[Home] Wallet initialized:', isInitialized);
-    console.log('[Home] Address:', walletAddress);
-  }, [isInitialized, walletAddress]);
+    const initWallet = async () => {
+      try {
+        setIsLoading(true);
+        console.log('[Home] Initializing wallet...');
 
-  const address = walletAddress || getWalletAddress() || 'Loading...';
+        // Check if already have address in context
+        if (webzjsState.currentAddress) {
+          console.log('[Home] Address already in context:', webzjsState.currentAddress);
+          setAddress(webzjsState.currentAddress);
+          setIsLoading(false);
+          return;
+        }
+
+        // Initialize WebZjs if needed
+        if (!webzjsState.isInitialized) {
+          console.log('[Home] Initializing WebZjs...');
+          await initializeWebZjs();
+        }
+
+        // Get vault (seed phrase) - already decrypted since user unlocked
+        const vault = getVaultData();
+        if (!vault || !vault.seedPhrase) {
+          throw new Error('No seed phrase found. Please unlock wallet.');
+        }
+
+        console.log('[Home] Creating wallet from seed...');
+        const result = await createWalletFromSeed(
+          vault.accountName || 'Account 1',
+          vault.seedPhrase,
+          0,
+          vault.birthdayHeight || 2800000
+        );
+
+        console.log('[Home] ✅ Wallet created! Address:', result.address);
+        setAddress(result.address);
+      } catch (err) {
+        console.error('[Home] Failed to initialize wallet:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load wallet');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initWallet();
+  }, [webzjsState.isInitialized, webzjsState.currentAddress, initializeWebZjs, createWalletFromSeed, setAddress]);
+
+  const address = isLoading ? 'Loading...' : (walletAddress || 'No address');
 
   const handleCopyAddress = async () => {
     if (address) {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAppStore } from '@/lib/storage/store';
+import { useWebZjs } from '@/context/WebzjsContext';
 
 export function SetPassword() {
   const navigateTo = useAppStore((state) => state.navigateTo);
@@ -71,14 +72,8 @@ export function SetPassword() {
 
       console.log('[SetPassword] ✅ Vault created (seed encrypted with AES-256-GCM)');
 
-      // Step 2: Initialize WebZjs and create wallet
-      console.log('[SetPassword] Step 2/3: Initializing WebZjs wallet...');
-      const { initializeWallet } = await import('@/lib/wallet-manager');
-
-      await initializeWallet();
-
-      console.log('[SetPassword] ✅ WebZjs wallet created with REAL address!');
-      console.log('[SetPassword] Step 3/3: Ready to use');
+      console.log('[SetPassword] Step 2/3: Password set, navigating to home...');
+      console.log('[SetPassword] Wallet will be initialized on Home screen');
 
       // Navigate to home
       navigateTo('home');

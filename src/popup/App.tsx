@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useAppStore } from '@/lib/storage/store';
 import { vaultExists } from '@/lib/storage/secure-storage';
+import { WebZjsProvider } from '@/context/WebzjsContext';
 import { Unlock } from '@/pages/Unlock';
 import { Welcome } from '@/pages/Welcome';
 import { CreateWallet } from '@/pages/CreateWallet';
@@ -9,7 +10,7 @@ import { ImportWallet } from '@/pages/ImportWallet';
 import { SetPassword } from '@/pages/SetPassword';
 import { Home } from '@/pages/Home';
 
-function App() {
+function AppContent() {
   const currentPage = useAppStore((state) => state.currentPage);
   const navigateTo = useAppStore((state) => state.navigateTo);
 
@@ -50,6 +51,14 @@ function App() {
     default:
       return <Unlock />;
   }
+}
+
+function App() {
+  return (
+    <WebZjsProvider>
+      <AppContent />
+    </WebZjsProvider>
+  );
 }
 
 export default App;

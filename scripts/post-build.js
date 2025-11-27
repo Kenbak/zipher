@@ -26,15 +26,15 @@ if (!fs.existsSync(iconsDir)) {
 }
 
 fs.copyFileSync(
-  path.join(__dirname, '../public/icons/icon16.png'),
+  path.join(__dirname, '../icons/icon16.png'),
   path.join(iconsDir, 'icon16.png')
 );
 fs.copyFileSync(
-  path.join(__dirname, '../public/icons/icon48.png'),
+  path.join(__dirname, '../icons/icon48.png'),
   path.join(iconsDir, 'icon48.png')
 );
 fs.copyFileSync(
-  path.join(__dirname, '../public/icons/icon128.png'),
+  path.join(__dirname, '../icons/icon128.png'),
   path.join(iconsDir, 'icon128.png')
 );
 

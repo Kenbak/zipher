@@ -1,9 +1,9 @@
 /**
  * Service Worker (Non-Bundled)
- * 
+ *
  * This file is NOT processed by Vite/TypeScript.
  * It loads WebZjs directly using importScripts or dynamic import.
- * 
+ *
  * Why not bundled?
  * - Vite cannot handle WebZjs circular worker dependencies
  * - Service workers can load ES modules directly
@@ -28,25 +28,25 @@ async function initializeWebZjs() {
 
   try {
     console.log('[ServiceWorker] Loading WebZjs module...');
-    
+
     // Import WebZjs as ES module (works in modern service workers!)
     const webzjsUrl = chrome.runtime.getURL('/lib/webzjs-wallet/webzjs_wallet.js');
     const module = await import(webzjsUrl);
-    
+
     const { default: initWasm, initThreadPool, WebWallet } = module;
-    
+
     console.log('[ServiceWorker] Initializing WASM...');
     await initWasm();
-    
+
     console.log('[ServiceWorker] Initializing thread pool...');
     await initThreadPool(4);
-    
+
     // Store WebWallet class for later use
     self.WebWallet = WebWallet;
-    
+
     isWebZjsInitialized = true;
     console.log('[ServiceWorker] ✅ WebZjs initialized!');
-    
+
   } catch (error) {
     console.error('[ServiceWorker] WebZjs initialization failed:', error);
     throw error;
@@ -58,29 +58,29 @@ async function initializeWebZjs() {
  */
 async function createWalletFromSeed(accountName, seedPhrase, accountHdIndex, birthdayHeight) {
   console.log('[ServiceWorker] Creating wallet...');
-  
+
   await initializeWebZjs();
-  
+
   const LIGHTWALLETD_URL = 'https://zcash-testnet.chainsafe.dev';
   const NETWORK = 'test';
   const MIN_CONFIRMATIONS = 10;
-  
+
   walletInstance = new self.WebWallet(NETWORK, LIGHTWALLETD_URL, MIN_CONFIRMATIONS);
-  
+
   const accountId = await walletInstance.create_account(
     accountName,
     seedPhrase,
     accountHdIndex,
     birthdayHeight || null
   );
-  
+
   const address = await walletInstance.get_current_address(accountId);
-  
+
   currentAddress = address;
-  
+
   console.log('[ServiceWorker] ✅ Wallet created!');
   console.log('[ServiceWorker] ✅ Address:', address);
-  
+
   return { accountId, address };
 }
 
@@ -158,7 +158,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Extension installed
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('[ServiceWorker] Extension installed:', details.reason);
-  
+
   if (details.reason === 'install') {
     chrome.storage.local.set({
       isFirstRun: true,
@@ -169,4 +169,3 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 console.log('[ServiceWorker] Ready!');
-

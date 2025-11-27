@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppStore } from '@/lib/storage/store';
-import { unlockVault, getVaultData } from '@/lib/storage/secure-storage';
+import { unlockVault } from '@/lib/storage/secure-storage';
 import { useWebZjs } from '@/context/WebzjsContext';
 
 export function Unlock() {
@@ -24,25 +24,30 @@ export function Unlock() {
     try {
       console.log('[Unlock] Attempting to unlock vault...');
 
-      // Try to decrypt vault with password
-      await unlockVault(password);
+      // Decrypt vault with password and get vault data
+      const vaultData = await unlockVault(password);
 
       console.log('[Unlock] ✅ Vault unlocked!');
+      console.log('[Unlock] Vault data:', {
+        hasSeed: !!vaultData.seedPhrase,
+        birthdayHeight: vaultData.birthdayHeight,
+        createdAt: vaultData.createdAt
+      });
+
+      if (!vaultData?.seedPhrase) {
+        throw new Error('Vault data invalid: no seed phrase');
+      }
 
       // Initialize WebZjs in popup (NOT service worker!)
       console.log('[Unlock] Initializing WebZjs...');
       await initializeWebZjs();
 
-      // Get vault data and create wallet
-      const vaultData = getVaultData();
-      if (!vaultData?.seedPhrase) {
-        throw new Error('Vault data not found after unlock');
-      }
-
       console.log('[Unlock] Creating wallet from seed...');
       await createWalletFromSeed(
-        vaultData.seedPhrase,
-        vaultData.birthdayHeight || undefined
+        'Account 1',                            // accountName
+        vaultData.seedPhrase,                    // seedPhrase
+        0,                                       // accountHdIndex
+        vaultData.birthdayHeight || null         // birthdayHeight
       );
 
       console.log('[Unlock] ✅ Wallet ready!');

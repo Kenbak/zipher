@@ -164,8 +164,8 @@ export function Home() {
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-4 gap-3">
-            <button className="flex flex-col items-center space-y-2 p-3 hover:bg-cipher-surface rounded-lg transition-colors">
+          <div className="grid grid-cols-2 gap-4">
+            <button className="flex flex-col items-center space-y-2 p-4 hover:bg-cipher-surface rounded-lg transition-colors">
               <div className="w-12 h-12 bg-cipher-cyan/10 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-cipher-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -174,7 +174,7 @@ export function Home() {
               <span className="text-xs font-medium">Receive</span>
             </button>
 
-            <button className="flex flex-col items-center space-y-2 p-3 hover:bg-cipher-surface rounded-lg transition-colors">
+            <button className="flex flex-col items-center space-y-2 p-4 hover:bg-cipher-surface rounded-lg transition-colors">
               <div className="w-12 h-12 bg-cipher-green/10 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-cipher-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -182,51 +182,6 @@ export function Home() {
               </div>
               <span className="text-xs font-medium">Send</span>
             </button>
-
-            <button className="flex flex-col items-center space-y-2 p-3 hover:bg-cipher-surface rounded-lg transition-colors">
-              <div className="w-12 h-12 bg-purple-500/10 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                </svg>
-              </div>
-              <span className="text-xs font-medium">Swap</span>
-            </button>
-
-            <button className="flex flex-col items-center space-y-2 p-3 hover:bg-cipher-surface rounded-lg transition-colors">
-              <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span className="text-xs font-medium">Buy</span>
-            </button>
-          </div>
-
-          {/* Tokens Section */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-400">Assets</h3>
-              <button className="text-xs text-cipher-cyan hover:underline">View All</button>
-            </div>
-
-            {/* ZEC Token */}
-            <div className="bg-cipher-surface border border-cipher-border rounded-lg p-4 hover:border-cipher-cyan/50 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-cipher-cyan/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold text-cipher-cyan">Ƶ</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold">Zcash</p>
-                    <p className="text-xs text-gray-400">0.00 ZEC</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">$0.00</p>
-                  <p className="text-xs text-gray-500">0.00%</p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Recent Transactions */}

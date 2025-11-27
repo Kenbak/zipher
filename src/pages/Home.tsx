@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWalletState } from '@/lib/storage/wallet-state';
 import { useWebZjs } from '@/context/WebzjsContext';
 import { getVaultData } from '@/lib/storage/secure-storage';
+import type { DecryptedTransaction } from '@/lib/zcash-sync';
 
 export function Home() {
   const walletAddress = useWalletState((state) => state.address);
@@ -9,8 +10,30 @@ export function Home() {
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [transactions, setTransactions] = useState<DecryptedTransaction[]>([]);
 
   const { state: webzjsState, createWalletFromSeed, initializeWebZjs, syncWallet } = useWebZjs();
+
+  // Load transactions from sync state
+  useEffect(() => {
+    const loadTransactions = async () => {
+      if (!webzjsState.currentAddress) return;
+
+      try {
+        const storageKey = `ziphers_sync_state_${webzjsState.currentAddress}`;
+        const result = await chrome.storage.local.get(storageKey);
+        const syncState = result[storageKey];
+
+        if (syncState?.transactions) {
+          setTransactions(syncState.transactions);
+        }
+      } catch (error) {
+        console.error('[Home] Failed to load transactions:', error);
+      }
+    };
+
+    loadTransactions();
+  }, [webzjsState.currentAddress, webzjsState.lastSyncTime]); // Reload when sync completes
 
   useEffect(() => {
     const initWallet = async () => {
@@ -186,18 +209,66 @@ export function Home() {
 
           {/* Recent Transactions */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-400">Recent Activity</h3>
-            <div className="bg-cipher-surface border border-cipher-border rounded-lg p-6 text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-cipher-border rounded-full mb-3">
-                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <p className="text-sm text-gray-500">No transactions yet</p>
-              <p className="text-xs text-gray-600 mt-1">
-                Your activity will appear here
-              </p>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-400">Recent Activity</h3>
+              {transactions.length > 0 && (
+                <a
+                  href={`https://testnet.cipherscan.app/address/${address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-cipher-cyan hover:underline"
+                >
+                  View All on CipherScan →
+                </a>
+              )}
             </div>
+
+            {transactions.length === 0 ? (
+              <div className="bg-cipher-surface border border-cipher-border rounded-lg p-6 text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-cipher-border rounded-full mb-3">
+                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500">No transactions yet</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Your activity will appear here
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {transactions.slice(0, 5).map((tx) => (
+                  <a
+                    key={tx.txid}
+                    href={`https://testnet.cipherscan.app/tx/${tx.txid}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-cipher-surface border border-cipher-border rounded-lg p-4 hover:border-cipher-cyan/50 transition-colors cursor-pointer block"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-cipher-green/10 rounded-full flex items-center justify-center">
+                          <svg className="w-5 h-5 text-cipher-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Received</p>
+                          <p className="text-xs text-gray-400">Block #{tx.height}</p>
+                          {tx.outputs[0]?.memo && (
+                            <p className="text-xs text-cipher-cyan mt-1">"{tx.outputs[0].memo}"</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-cipher-green">+{tx.received.toFixed(8)} ZEC</p>
+                        <p className="text-xs text-gray-500">{tx.txid.slice(0, 8)}...</p>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Success Banner */}
@@ -211,19 +282,12 @@ export function Home() {
 
       {/* Bottom Navigation */}
       <nav className="bg-cipher-surface border-t border-cipher-border p-2">
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-3 gap-1">
           <button className="flex flex-col items-center py-2 px-3 text-cipher-cyan">
             <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             <span className="text-xs">Home</span>
-          </button>
-
-          <button className="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-white transition-colors">
-            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-            </svg>
-            <span className="text-xs">Swap</span>
           </button>
 
           <button className="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-white transition-colors">

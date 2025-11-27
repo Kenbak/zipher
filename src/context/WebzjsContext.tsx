@@ -331,7 +331,7 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
 
         console.log('[WebZjs] 🧪 TESTING PCZT FLOW...');
         console.log('[WebZjs] 🔵 Step 1/4: Creating PCZT (client-side signing)...');
-        
+
         // Test if pczt_create works in Chrome extension
         try {
           // @ts-ignore - pczt_create might not be in types yet

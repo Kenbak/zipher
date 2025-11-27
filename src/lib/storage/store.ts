@@ -12,6 +12,7 @@ export type Page =
   | 'set-password'
   | 'home'
   | 'send'
+  | 'receive'
   | 'settings';
 
 interface AppState {

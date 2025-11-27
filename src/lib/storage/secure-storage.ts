@@ -40,6 +40,7 @@ export interface VaultData {
   accountName: string;
   birthdayHeight: number | null;
   createdAt: number;
+  address?: string; // Store the generated address
 }
 
 /**

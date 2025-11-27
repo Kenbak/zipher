@@ -10,6 +10,7 @@ import { ImportWallet } from '@/pages/ImportWallet';
 import { SetPassword } from '@/pages/SetPassword';
 import { Home } from '@/pages/Home';
 import { Send } from '@/pages/Send';
+import { Receive } from '@/pages/Receive';
 import { Settings } from '@/pages/Settings';
 
 function AppContent() {
@@ -52,6 +53,8 @@ function AppContent() {
       return <Home />;
     case 'send':
       return <Send />;
+    case 'receive':
+      return <Receive />;
     case 'settings':
       return <Settings />;
     default:

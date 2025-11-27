@@ -4,6 +4,7 @@ import { useAppStore } from '@/lib/storage/store';
 import { useWebZjs } from '@/context/WebzjsContext';
 import { getVaultData } from '@/lib/storage/secure-storage';
 import type { DecryptedTransaction } from '@/lib/zcash-sync';
+import { syncWallet as customSync } from '@/lib/zcash-sync';
 
 export function Home() {
   const navigateTo = useAppStore((state) => state.navigateTo);
@@ -15,7 +16,7 @@ export function Home() {
   const [transactions, setTransactions] = useState<DecryptedTransaction[]>([]);
   const [balanceVisible, setBalanceVisible] = useState(true);
 
-  const { state: webzjsState, createWalletFromSeed, initializeWebZjs, syncWallet } = useWebZjs();
+  const { state: webzjsState, createWalletFromSeed, initializeWebZjs } = useWebZjs();
 
   // Load transactions from sync state
   useEffect(() => {
@@ -38,13 +39,13 @@ export function Home() {
     loadTransactions();
   }, [webzjsState.currentAddress, webzjsState.lastSyncTime]); // Reload when sync completes
 
-  // Step 1: Initialize WebZjs WASM
+  // Step 1: Initialize WebZjs WASM (single-threaded)
   useEffect(() => {
     if (webzjsState.isInitialized || webzjsState.isInitializing) {
       return;
     }
 
-    console.log('[Home] Step 1: Initializing WebZjs WASM...');
+    console.log('[Home] Initializing WebZjs...');
     initializeWebZjs().catch(err => {
       console.error('[Home] WebZjs init failed:', err);
       setError('Failed to initialize WebZjs: ' + err.message);
@@ -52,7 +53,7 @@ export function Home() {
     });
   }, [webzjsState.isInitialized, webzjsState.isInitializing, initializeWebZjs]);
 
-  // Step 2: Create wallet ONLY after WebZjs is ready
+  // Step 2: Create wallet ONLY to get address (NO SYNC!)
   useEffect(() => {
     if (!webzjsState.isInitialized) {
       console.log('[Home] Waiting for WebZjs initialization...');
@@ -69,14 +70,15 @@ export function Home() {
     const createWallet = async () => {
       try {
         setIsLoading(true);
-        console.log('[Home] Step 2: Creating wallet + syncing with CipherScan lightwalletd...');
-        console.log('[Home] ⏳ This may take 1-3 minutes (single-threaded)...');
+        console.log('[Home] Creating wallet to get address...');
 
         const vault = getVaultData();
         if (!vault || !vault.seedPhrase) {
           throw new Error('No seed phrase found. Please unlock wallet.');
         }
 
+        // This creates a WebWallet and calls create_account + get_current_address
+        // But does NOT sync (we use custom sync later)
         const result = await createWalletFromSeed(
           vault.accountName || 'Account 1',
           vault.seedPhrase,
@@ -84,19 +86,22 @@ export function Home() {
           vault.birthdayHeight || null
         );
 
-        console.log('[Home] ✅ Wallet synced! Address:', result.address);
+        console.log('[Home] ✅ Address generated:', result.address);
         setAddress(result.address);
+
+        // Start custom WASM sync in background
+        console.log('[Home] Starting background sync...');
+        customSync(vault.seedPhrase, result.address, vault.birthdayHeight, vault.createdAt)
+          .then(syncState => {
+            console.log('[Home] ✅ Sync complete:', syncState);
+          })
+          .catch(err => {
+            console.error('[Home] Sync failed:', err);
+          });
 
       } catch (err) {
         console.error('[Home] Failed to create wallet:', err);
-
-        if (err instanceof Error && err.message.includes('eval')) {
-          setError('CSP Error: WebZjs single-threaded build failed.');
-        } else if (err instanceof Error && (err.message.includes('GRPC') || err.message.includes('504'))) {
-          setError('Network error: Cannot connect to CipherScan lightwalletd. Check server.');
-        } else {
-          setError(err instanceof Error ? err.message : 'Failed to create wallet');
-        }
+        setError(err instanceof Error ? err.message : 'Failed to create wallet');
       } finally {
         setIsLoading(false);
       }
@@ -140,15 +145,9 @@ export function Home() {
         <div className="text-center space-y-6 max-w-md">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-cipher-cyan mx-auto"></div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold">Initializing Wallet</h2>
+            <h2 className="text-2xl font-bold">Loading Wallet</h2>
             <p className="text-gray-400">
-              WebZjs is syncing with the blockchain...
-            </p>
-            <p className="text-sm text-gray-500">
-              ⏳ This may take 1-5 minutes for the first sync
-            </p>
-            <p className="text-xs text-gray-600">
-              (Single-threaded mode for Chrome MV3 compatibility)
+              Setting up your wallet...
             </p>
           </div>
           {error && (
@@ -295,7 +294,10 @@ export function Home() {
 
           {/* Action Buttons - Compact */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center space-x-3 bg-cipher-surface border border-cipher-border hover:border-cipher-cyan/50 rounded-xl p-3 transition-all">
+            <button
+              onClick={() => navigateTo('receive')}
+              className="flex items-center space-x-3 bg-cipher-surface border border-cipher-border hover:border-cipher-cyan/50 rounded-xl p-3 transition-all"
+            >
               <div className="w-9 h-9 bg-cipher-cyan/10 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-cipher-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />

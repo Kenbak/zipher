@@ -327,7 +327,7 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Convert ZEC to zatoshis (1 ZEC = 100,000,000 zatoshis)
-        const zatoshis = amount * 100_000_000;
+        const zatoshis = BigInt(Math.floor(amount * 100_000_000));
 
         console.log('[WebZjs] 🧪 TESTING PCZT FLOW...');
         console.log('[WebZjs] 🔵 Step 1/4: Creating PCZT (client-side signing)...');
@@ -340,26 +340,26 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
             toAddress,
             zatoshis
           );
-          
+
           console.log('[WebZjs] ✅ PCZT CREATED AND SIGNED! This worked WITHOUT eval()! 🎉');
           console.log('[WebZjs] PCZT type:', typeof pczt);
           console.log('[WebZjs] PCZT:', pczt);
-          
+
           // Serialize PCZT for backend
           // @ts-ignore
           const pcztBytes = pczt.serialize ? pczt.serialize() : pczt;
           console.log('[WebZjs] PCZT serialized, ready to send to backend prover');
-          
+
           throw new Error('✅ PCZT TEST SUCCESSFUL! Now we need to implement backend prover. Check console for details.');
-          
+
         } catch (error: any) {
           console.error('[WebZjs] ❌ PCZT test failed:', error);
-          
+
           // If pczt_create doesn't exist, show helpful error
           if (error.message?.includes('pczt_create')) {
             throw new Error('WebZjs version does not support PCZT. Need to update WebZjs or use backend for full flow.');
           }
-          
+
           throw error;
         }
 

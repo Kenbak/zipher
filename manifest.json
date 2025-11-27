@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Ziphers - Zcash Wallet (Testnet)",
+  "name": "Zipher - Zcash Wallet (Testnet)",
   "version": "0.1.0",
   "description": "Privacy-first Zcash wallet by CipherScan. Non-custodial, secure, testnet-only.",
   "author": "CipherScan Team",
@@ -21,7 +21,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "Ziphers - Zcash Wallet"
+    "default_title": "Zipher - Zcash Wallet"
   },
 
   "background": {

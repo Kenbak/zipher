@@ -10,7 +10,7 @@ export function Welcome() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">
             <span className="text-cipher-cyan">Zi</span>
-            <span className="text-cipher-green">phers</span>
+            <span className="text-cipher-green">pher</span>
           </h1>
           <span className="text-xs text-cipher-orange bg-cipher-orange/10 px-2 py-1 rounded">
             TESTNET
@@ -24,7 +24,7 @@ export function Welcome() {
           {/* Welcome Message */}
           <div className="space-y-2">
             <h2 className="text-3xl font-bold">
-              Welcome to Ziphers! 🎉
+              Welcome to Zipher! 🎉
             </h2>
             <p className="text-gray-400 text-sm">
               Your privacy-first Zcash wallet
@@ -81,7 +81,7 @@ export function Welcome() {
           {/* Warning */}
           <div className="bg-cipher-orange/10 border border-cipher-orange/30 rounded-lg p-3">
             <p className="text-xs text-cipher-orange">
-              ⚠️ Never share your seed phrase with anyone. Ziphers will never ask for it.
+              ⚠️ Never share your seed phrase with anyone. Zipher will never ask for it.
             </p>
           </div>
         </div>

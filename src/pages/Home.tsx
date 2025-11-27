@@ -192,7 +192,7 @@ export function Home() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">
             <span className="text-cipher-cyan">Zi</span>
-            <span className="text-cipher-green">phers</span>
+            <span className="text-cipher-green">pher</span>
           </h1>
           <div className="flex items-center space-x-2">
             <span className="text-xs text-cipher-orange bg-cipher-orange/10 px-2 py-1 rounded">
@@ -242,7 +242,7 @@ export function Home() {
           </div>
 
           {/* Balance Card - Compact */}
-          <div className="bg-cipher-surface border border-cipher-border rounded-2xl p-6">
+          <div className="bg-cipher-surface border border-cipher-border rounded-2xl p-5">
             <p className="text-xs uppercase tracking-wide text-gray-500 mb-3">Total Balance</p>
             {webzjsState.isSyncing && webzjsState.balance === 0n ? (
               <div className="flex items-center space-x-3 py-2">
@@ -252,12 +252,12 @@ export function Home() {
             ) : (
               <>
                 <div className="flex items-center space-x-2 mb-2">
-                  <p className="text-3xl font-bold text-cipher-cyan">{balance}</p>
-                  <div className="flex items-center space-x-1.5">
-                    <img 
-                      src="/icons/zcash-logo.svg" 
-                      alt="Zcash" 
-                      className="w-6 h-6"
+                  <p className="text-3xl font-bold text-white">{balance}</p>
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src="/icons/zcash-logo.svg"
+                      alt="Zcash"
+                      className="w-8 h-8"
                     />
                     <span className="text-xl font-semibold text-white">ZEC</span>
                   </div>
@@ -265,17 +265,12 @@ export function Home() {
                 <p className="text-sm text-gray-500">≈ ${balanceUSD} USD</p>
               </>
             )}
-            {webzjsState.lastSyncTime && (
-              <p className="text-gray-600 text-xs mt-3">
-                Last synced: {new Date(webzjsState.lastSyncTime).toLocaleTimeString()}
-              </p>
-            )}
           </div>
 
           {/* Action Buttons - Compact */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center space-x-3 bg-cipher-surface border border-cipher-border hover:border-cipher-cyan/50 rounded-xl p-4 transition-all">
-              <div className="w-10 h-10 bg-cipher-cyan/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <button className="flex items-center space-x-3 bg-cipher-surface border border-cipher-border hover:border-cipher-cyan/50 rounded-xl p-3 transition-all">
+              <div className="w-9 h-9 bg-cipher-cyan/10 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-cipher-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                 </svg>
@@ -285,9 +280,9 @@ export function Home() {
 
             <button
               onClick={() => navigateTo('send')}
-              className="flex items-center space-x-3 bg-cipher-surface border border-cipher-border hover:border-cipher-green/50 rounded-xl p-4 transition-all"
+              className="flex items-center space-x-3 bg-cipher-surface border border-cipher-border hover:border-cipher-green/50 rounded-xl p-3 transition-all"
             >
-              <div className="w-10 h-10 bg-cipher-green/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 bg-cipher-green/10 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-cipher-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
@@ -308,7 +303,7 @@ export function Home() {
                 rel="noopener noreferrer"
                 className="text-xs text-cipher-cyan hover:text-cipher-cyan/80 transition-colors font-medium"
               >
-                View All on CipherScan →
+                View All →
               </a>
             )}
           </div>
@@ -336,23 +331,21 @@ export function Home() {
                   className="bg-cipher-surface border border-cipher-border rounded-xl p-4 hover:border-cipher-cyan/50 hover:bg-cipher-surface/80 transition-all cursor-pointer block"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
                       <div className="w-10 h-10 bg-cipher-green/10 rounded-full flex items-center justify-center flex-shrink-0">
                         <svg className="w-5 h-5 text-cipher-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                         </svg>
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="font-semibold text-sm">Received</p>
-                        <p className="text-xs text-gray-500">Block #{tx.height}</p>
                         {tx.outputs[0]?.memo && (
-                          <p className="text-xs text-cipher-cyan mt-1 truncate">"{tx.outputs[0].memo}"</p>
+                          <p className="text-xs text-cipher-cyan mt-0.5 truncate">"{tx.outputs[0].memo}"</p>
                         )}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-3">
                       <p className="font-semibold text-sm text-cipher-green">+{tx.received.toFixed(8)} ZEC</p>
-                      <p className="text-xs text-gray-500">{tx.txid.slice(0, 8)}...</p>
                     </div>
                   </div>
                 </a>

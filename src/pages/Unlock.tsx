@@ -69,7 +69,7 @@ export function Unlock() {
         <div className="flex items-center justify-center">
           <h1 className="text-xl font-bold">
             <span className="text-cipher-cyan">Zi</span>
-            <span className="text-cipher-green">phers</span>
+            <span className="text-cipher-green">pher</span>
           </h1>
         </div>
       </header>
@@ -81,7 +81,7 @@ export function Unlock() {
           <div className="text-center">
             <img
               src="/icons/zipher_logo.png"
-              alt="Ziphers Logo"
+              alt="Zipher Logo"
               className="w-32 h-32 mx-auto mb-4"
             />
           </div>

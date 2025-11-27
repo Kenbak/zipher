@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useAppStore } from '@/lib/storage/store';
 import { unlockVault } from '@/lib/storage/secure-storage';
-import { useWebZjs } from '@/context/WebzjsContext';
 
 export function Unlock() {
   const navigateTo = useAppStore((state) => state.navigateTo);
-  const { initializeWebZjs, createWalletFromSeed } = useWebZjs();
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -38,19 +36,11 @@ export function Unlock() {
         throw new Error('Vault data invalid: no seed phrase');
       }
 
-      // Initialize WebZjs in popup (NOT service worker!)
-      console.log('[Unlock] Initializing WebZjs...');
-      await initializeWebZjs();
-
-      console.log('[Unlock] Creating wallet from seed...');
-      await createWalletFromSeed(
-        'Account 1',                            // accountName
-        vaultData.seedPhrase,                    // seedPhrase
-        0,                                       // accountHdIndex
-        vaultData.birthdayHeight || null         // birthdayHeight
-      );
-
-      console.log('[Unlock] ✅ Wallet ready!');
+      // Skip WebZjs initialization on unlock
+      // WebZjs will be initialized lazily when needed (Send page)
+      // For now, we only use custom sync (CipherScan WASM) for viewing
+      console.log('[Unlock] ✅ Wallet unlocked!');
+      console.log('[Unlock] ℹ️  WebZjs will be initialized only when sending transactions');
 
       // Navigate to home
       navigateTo('home');

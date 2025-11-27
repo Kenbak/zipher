@@ -76,37 +76,32 @@ export function Unlock() {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm space-y-6">
-          {/* Lock Icon */}
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-cipher-surface border border-cipher-border rounded-full">
-              <svg className="w-8 h-8 text-cipher-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">Welcome Back</h2>
-              <p className="text-sm text-gray-400 mt-1">
-                Enter your password to unlock
-              </p>
-            </div>
+        <div className="w-full max-w-sm space-y-12">
+          {/* Logo */}
+          <div className="text-center">
+            <img
+              src="/icons/zipher_logo.png"
+              alt="Ziphers Logo"
+              className="w-32 h-32 mx-auto mb-4"
+            />
           </div>
 
-          {/* Password Input */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Enter password"
-                className="w-full bg-cipher-surface border border-cipher-border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cipher-cyan"
-                disabled={isUnlocking}
-                autoFocus
-              />
-            </div>
+          {/* Form */}
+          <div className="space-y-6">
+            <h3 className="text-center text-white text-xl font-medium">
+              Enter your password
+            </h3>
+
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Password"
+              className="w-full bg-cipher-surface border border-cipher-border rounded-lg px-4 py-3 text-base text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cipher-cyan"
+              disabled={isUnlocking}
+              autoFocus
+            />
 
             {/* Error Message */}
             {error && (
@@ -119,55 +114,30 @@ export function Unlock() {
             <button
               onClick={handleUnlock}
               disabled={!password || isUnlocking}
-              className="w-full bg-cipher-cyan hover:bg-cipher-cyan/90 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-cipher-bg font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
+              className="w-full bg-cipher-cyan hover:bg-cipher-cyan/90 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-cipher-bg font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center text-base"
             >
               {isUnlocking ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-cipher-bg border-t-transparent rounded-full animate-spin mr-2" />
+                  <div className="w-6 h-6 border-2 border-cipher-bg border-t-transparent rounded-full animate-spin mr-2" />
                   Unlocking...
                 </>
               ) : (
                 'Unlock'
               )}
             </button>
-          </div>
 
-          {/* Help Text */}
-          <div className="text-center space-y-2">
-            <p className="text-xs text-gray-500">
-              Forgot your password? You can restore your wallet using your seed phrase.
-            </p>
-            <button
-              onClick={() => navigateTo('welcome')}
-              className="text-xs text-cipher-cyan hover:underline"
-            >
-              Reset Wallet
-            </button>
-          </div>
-
-          {/* Testnet Badge */}
-          <div className="text-center">
-            <span className="inline-block text-xs text-cipher-orange bg-cipher-orange/10 px-3 py-1 rounded">
-              TESTNET
-            </span>
+            {/* Forgot Password */}
+            <div className="text-center pt-2">
+              <button
+                onClick={() => navigateTo('welcome')}
+                className="text-base text-gray-400 hover:text-cipher-cyan transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="p-4 text-center">
-        <p className="text-xs text-gray-500">
-          Powered by{' '}
-          <a
-            href="https://cipherscan.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-cipher-cyan hover:underline"
-          >
-            CipherScan
-          </a>
-        </p>
-      </footer>
     </div>
   );
 }

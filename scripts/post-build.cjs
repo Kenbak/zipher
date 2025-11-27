@@ -30,12 +30,24 @@ fs.copyFileSync(
   path.join(iconsDir, 'icon16.png')
 );
 fs.copyFileSync(
+  path.join(__dirname, '../public/icons/icon32.png'),
+  path.join(iconsDir, 'icon32.png')
+);
+fs.copyFileSync(
   path.join(__dirname, '../public/icons/icon48.png'),
   path.join(iconsDir, 'icon48.png')
 );
 fs.copyFileSync(
   path.join(__dirname, '../public/icons/icon128.png'),
   path.join(iconsDir, 'icon128.png')
+);
+fs.copyFileSync(
+  path.join(__dirname, '../public/icons/zipher_logo.png'),
+  path.join(iconsDir, 'zipher_logo.png')
+);
+fs.copyFileSync(
+  path.join(__dirname, '../public/icons/zcash-logo.svg'),
+  path.join(iconsDir, 'zcash-logo.svg')
 );
 
 console.log('\n✅ Post-build complete!\n');

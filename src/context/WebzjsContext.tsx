@@ -308,7 +308,7 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
   );
 
   /**
-   * Send transaction
+   * Send transaction (3-step process: propose → authorize → send)
    */
   const sendTransaction = useCallback(
     async (toAddress: string, amount: number, memo?: string): Promise<string> => {
@@ -319,16 +319,42 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
       console.log('[WebZjs] Sending transaction:', { toAddress, amount, memo });
 
       try {
+        // Get seed phrase from secure storage
+        const { getVaultData } = await import('@/lib/storage/secure-storage');
+        const vaultData = getVaultData();
+        if (!vaultData?.seedPhrase) {
+          throw new Error('Seed phrase not available. Please unlock wallet.');
+        }
+
         // Convert ZEC to zatoshis (1 ZEC = 100,000,000 zatoshis)
         const zatoshis = BigInt(Math.floor(amount * 100_000_000));
 
-        // Send transaction
-        const txid = await state.webWallet.send_transaction(
+        // Step 1: Create proposal
+        console.log('[WebZjs] Step 1/3: Creating proposal...');
+        const proposal = await state.webWallet.propose_transfer(
           state.accountId,
           toAddress,
-          zatoshis,
-          memo || ''
+          zatoshis
         );
+
+        // Step 2: Authorize (sign + prove)
+        console.log('[WebZjs] Step 2/3: Authorizing transaction (this may take a while)...');
+        const txids = await state.webWallet.create_proposed_transactions(
+          proposal,
+          vaultData.seedPhrase,
+          0 // account_hd_index
+        );
+
+        // Step 3: Broadcast
+        console.log('[WebZjs] Step 3/3: Broadcasting to network...');
+        await state.webWallet.send_authorized_transactions(txids);
+
+        // Extract TXID from Uint8Array (first 32 bytes, reversed for display)
+        const txidBytes = txids.slice(0, 32);
+        const txid = Array.from(txidBytes)
+          .reverse()
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
 
         console.log('[WebZjs] ✅ Transaction sent! TXID:', txid);
 

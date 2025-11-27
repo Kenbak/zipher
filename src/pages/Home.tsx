@@ -199,7 +199,7 @@ export function Home() {
               <span className="text-xs font-medium">Receive</span>
             </button>
 
-            <button 
+            <button
               onClick={() => navigateTo('send')}
               className="flex flex-col items-center space-y-2 p-4 hover:bg-cipher-surface rounded-lg transition-colors"
             >

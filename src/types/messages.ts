@@ -1,6 +1,6 @@
 /**
  * Message Types for Popup ↔ Service Worker Communication
- * 
+ *
  * Following Chrome Extension best practices:
  * - Popup (UI) sends messages to Service Worker
  * - Service Worker handles WebZjs and responds
@@ -133,4 +133,3 @@ export async function sendMessageToServiceWorker<T>(
 export function generateRequestId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
-

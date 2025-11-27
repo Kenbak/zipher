@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# Post-build script to copy WebZjs to dist folder
-# This is needed because WebZjs is excluded from Vite bundle
-# and loaded dynamically at runtime in the service worker
+# Post-build script to copy WebZjs and service worker to dist folder
 
 echo "📦 Copying WebZjs to dist..."
 
@@ -10,7 +8,11 @@ echo "📦 Copying WebZjs to dist..."
 mkdir -p dist/lib
 cp -r ../WebZjs/packages/webzjs-wallet dist/lib/
 
-echo "✅ WebZjs copied to dist/lib/webzjs-wallet"
-echo "Files:"
-ls -lh dist/lib/webzjs-wallet/ | head -10
+# Copy non-bundled service worker
+cp public/service-worker.js dist/
 
+echo "✅ WebZjs copied to dist/lib/webzjs-wallet"
+echo "✅ Service worker copied to dist/"
+echo ""
+echo "Files:"
+ls -lh dist/ | grep -E "service-worker|lib"

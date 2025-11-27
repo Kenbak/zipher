@@ -5,7 +5,7 @@ import { initializeWallet } from '@/lib/wallet-manager';
 
 export function Unlock() {
   const navigateTo = useAppStore((state) => state.navigateTo);
-  
+
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -22,18 +22,18 @@ export function Unlock() {
 
     try {
       console.log('[Unlock] Attempting to unlock vault...');
-      
+
       // Try to decrypt vault with password
       await unlockVault(password);
-      
+
       console.log('[Unlock] ✅ Vault unlocked!');
-      
+
       // Initialize wallet (this will generate address from decrypted seed)
       console.log('[Unlock] Initializing wallet...');
       await initializeWallet();
-      
+
       console.log('[Unlock] ✅ Wallet ready!');
-      
+
       // Navigate to home
       navigateTo('home');
     } catch (err) {
@@ -163,4 +163,3 @@ export function Unlock() {
     </div>
   );
 }
-

@@ -18,7 +18,7 @@ function App() {
     const checkWallet = async () => {
       const exists = await vaultExists();
       console.log('[App] Vault exists:', exists);
-      
+
       if (exists) {
         // Wallet already created → show unlock screen
         navigateTo('unlock');
@@ -27,7 +27,7 @@ function App() {
         navigateTo('welcome');
       }
     };
-    
+
     checkWallet();
   }, [navigateTo]);
 

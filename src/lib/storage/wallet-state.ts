@@ -1,6 +1,6 @@
 /**
  * Wallet State Management with Zustand
- * 
+ *
  * This manages the runtime state of the wallet including:
  * - WebZjs initialization status
  * - Current address
@@ -14,17 +14,17 @@ interface WalletState {
   // Initialization
   isInitialized: boolean;
   isUnlocked: boolean;
-  
+
   // Wallet data
   accountId: number | null;
   address: string | null;
   balance: bigint;
-  
+
   // Sync status
   isSyncing: boolean;
   lastSyncTime: number | null;
   syncProgress: number; // 0-100
-  
+
   // Actions
   setInitialized: (value: boolean) => void;
   setUnlocked: (value: boolean) => void;
@@ -47,7 +47,7 @@ export const useWalletState = create<WalletState>((set) => ({
   isSyncing: false,
   lastSyncTime: null,
   syncProgress: 0,
-  
+
   // Actions
   setInitialized: (value) => set({ isInitialized: value }),
   setUnlocked: (value) => set({ isUnlocked: value }),
@@ -68,4 +68,3 @@ export const useWalletState = create<WalletState>((set) => ({
     syncProgress: 0,
   }),
 }));
-

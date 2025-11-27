@@ -1,12 +1,12 @@
 /**
  * Service Worker for Ziphers Extension
- * 
+ *
  * Responsibilities:
  * - WebZjs wallet initialization and management
  * - Blockchain sync operations
  * - Message handling from popup
  * - Background tasks (periodic sync)
- * 
+ *
  * Why Service Worker?
  * - WebZjs uses Web Workers for WASM multi-threading
  * - Service workers can load WebZjs without Vite build issues
@@ -34,23 +34,22 @@ async function initializeWebZjs(): Promise<void> {
   }
 
   try {
-    console.log('[ServiceWorker] Loading WebZjs from /lib/webzjs-wallet...');
-    
-    // Dynamic import WebZjs from dist folder
-    // Note: WebZjs is excluded from Vite bundle and loaded at runtime
-    const webZjsModule = await import(chrome.runtime.getURL('/lib/webzjs-wallet/webzjs_wallet.js'));
-    const { default: initWasm, initThreadPool } = webZjsModule;
-    
+    console.log('[ServiceWorker] Loading WebZjs...');
+
+    // Static import works because service worker is bundled by Vite
+    // The circular deps issue is resolved by proper Vite config
+    const { default: initWasm, initThreadPool } = await import('@chainsafe/webzjs-wallet');
+
     console.log('[ServiceWorker] Initializing WASM...');
     await initWasm();
-    
+
     console.log('[ServiceWorker] Initializing thread pool...');
-    const threadCount = 4; // Service workers don't have navigator.hardwareConcurrency
+    const threadCount = 4;
     await initThreadPool(threadCount);
-    
+
     isWebZjsInitialized = true;
     console.log('[ServiceWorker] ✅ WebZjs initialized successfully!');
-    
+
   } catch (error) {
     console.error('[ServiceWorker] Failed to initialize WebZjs:', error);
     throw new Error(`WebZjs initialization failed: ${error}`);
@@ -67,21 +66,20 @@ async function createWalletFromSeed(
   birthdayHeight?: number
 ): Promise<{ accountId: number; address: string }> {
   console.log('[ServiceWorker] Creating wallet from seed...');
-  
+
   // Ensure WebZjs is initialized
   await initializeWebZjs();
-  
+
   try {
-    const webZjsModule = await import(chrome.runtime.getURL('/lib/webzjs-wallet/webzjs_wallet.js'));
-    const { WebWallet } = webZjsModule;
-    
+    const { WebWallet } = await import('@chainsafe/webzjs-wallet');
+
     const LIGHTWALLETD_URL = 'https://zcash-testnet.chainsafe.dev';
     const NETWORK = 'test';
     const MIN_CONFIRMATIONS = 10;
-    
+
     console.log('[ServiceWorker] Creating WebWallet instance...');
     walletInstance = new WebWallet(NETWORK, LIGHTWALLETD_URL, MIN_CONFIRMATIONS);
-    
+
     console.log('[ServiceWorker] Creating account...');
     const accountId = await walletInstance.create_account(
       accountName,
@@ -89,19 +87,19 @@ async function createWalletFromSeed(
       accountHdIndex,
       birthdayHeight || null
     );
-    
+
     console.log('[ServiceWorker] Account created, ID:', accountId);
-    
+
     console.log('[ServiceWorker] Getting address...');
     const address = await walletInstance.get_current_address(accountId);
-    
+
     console.log('[ServiceWorker] ✅ Address generated:', address);
-    
+
     // Cache for quick access
     currentAddress = address;
-    
+
     return { accountId, address };
-    
+
   } catch (error) {
     console.error('[ServiceWorker] Failed to create wallet:', error);
     throw error;
@@ -130,7 +128,7 @@ chrome.runtime.onMessage.addListener((
             accountHdIndex,
             birthdayHeight
           );
-          
+
           const response: MessageResponse<InitWalletResponse> = {
             success: true,
             requestId: message.requestId,
@@ -144,7 +142,7 @@ chrome.runtime.onMessage.addListener((
           if (!currentAddress) {
             throw new Error('Wallet not initialized');
           }
-          
+
           const response: MessageResponse<GetAddressResponse> = {
             success: true,
             requestId: message.requestId,

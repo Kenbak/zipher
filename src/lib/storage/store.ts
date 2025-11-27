@@ -3,7 +3,7 @@
  */
 import { create } from 'zustand';
 
-export type Page = 
+export type Page =
   | 'unlock'
   | 'welcome'
   | 'create-wallet'

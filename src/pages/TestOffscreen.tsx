@@ -15,7 +15,7 @@ export function TestOffscreen() {
 
       // Create offscreen document
       await chrome.offscreen.createDocument({
-        url: 'offscreen.html',
+        url: 'offscreen/offscreen.html',
         reasons: [chrome.offscreen.Reason.WORKERS],
         justification: 'Test if WebZjs can run with eval() and Web Workers in offscreen context',
       });
@@ -95,14 +95,14 @@ export function TestOffscreen() {
           {/* Results */}
           {result && (
             <div className={`border rounded-lg p-4 ${
-              result.success 
-                ? 'bg-cipher-green/10 border-cipher-green/30' 
+              result.success
+                ? 'bg-cipher-green/10 border-cipher-green/30'
                 : 'bg-red-500/10 border-red-500/30'
             }`}>
               <h3 className="font-semibold mb-2">
                 {result.success ? '✅ Test Results' : '❌ Test Failed'}
               </h3>
-              
+
               {result.result && (
                 <div className="space-y-2 text-sm">
                   <p>
@@ -159,4 +159,3 @@ export function TestOffscreen() {
     </div>
   );
 }
-

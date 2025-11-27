@@ -1,6 +1,6 @@
 /**
  * Offscreen Document for WebZjs Testing
- * 
+ *
  * This runs in an offscreen document which has more relaxed CSP.
  * We test if WebZjs's eval() and Web Workers work here.
  */
@@ -72,7 +72,7 @@ async function initWebZjsOffscreen() {
   console.log('[Offscreen] Initializing WebZjs wallet...');
 
   await initWebzJSWallet();
-  
+
   try {
     await initThreadPool(navigator.hardwareConcurrency || 4);
     console.log('[Offscreen] ✅ Multi-threaded mode enabled!');
@@ -128,4 +128,3 @@ async function sendTransaction(data: {
 }
 
 console.log('[Offscreen] Offscreen document ready!');
-

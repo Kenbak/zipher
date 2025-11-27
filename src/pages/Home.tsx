@@ -302,7 +302,7 @@ export function Home() {
             <span className="text-xs">Activity</span>
           </button>
 
-          <button 
+          <button
             onClick={() => navigateTo('test-offscreen')}
             className="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-white transition-colors"
           >

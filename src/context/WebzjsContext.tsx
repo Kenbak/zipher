@@ -1,9 +1,9 @@
 /**
  * WebZjs Context
- * 
+ *
  * Manages WebZjs wallet instance in the popup (React context with DOM access)
  * Based on official WebZjs demo: packages/web-wallet/src/context/WebzjsContext.tsx
- * 
+ *
  * Why in popup and not service worker?
  * - WebZjs needs DOM APIs (document, etc.)
  * - Service workers don't have DOM access
@@ -230,4 +230,3 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
     <WebZjsContext.Provider value={value}>{children}</WebZjsContext.Provider>
   );
 };
-

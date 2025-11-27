@@ -4,8 +4,8 @@
   "description": "Privacy-first Zcash wallet browser extension by CipherScan",
   "type": "module",
   "scripts": {
-    "dev": "parcel watch src/popup/index.html src/background/service-worker.ts src/offscreen/offscreen.html --dist-dir dist --no-hmr",
-    "build": "parcel build src/popup/index.html src/background/service-worker.ts src/offscreen/offscreen.html --dist-dir dist && node scripts/post-build.cjs",
+    "dev": "parcel watch src/popup/index.html src/background/service-worker.ts --dist-dir dist --no-hmr",
+    "build": "parcel build src/popup/index.html src/background/service-worker.ts --dist-dir dist && node scripts/post-build.cjs",
     "type-check": "tsc --noEmit",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },

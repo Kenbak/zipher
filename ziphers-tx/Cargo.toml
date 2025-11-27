@@ -1,32 +1,6 @@
 [package]
 name = "ziphers-tx"
 version = "0.1.0"
-edition = "2021"
-authors = ["Ziphers Team"]
-
-[lib]
-crate-type = ["cdylib", "rlib"]
-
-[features]
-default = ["wasm"]
-# WASM single-threaded (Chrome MV3 compatible - no eval)
-wasm = ["console_error_panic_hook"]
+edition = "2024"
 
 [dependencies]
-wasm-bindgen = "0.2"
-js-sys = "0.3"
-console_error_panic_hook = { version = "0.1.7", optional = true }
-getrandom = { version = "0.2", features = ["js"] }
-serde = "1.0"
-serde-wasm-bindgen = "0.6"
-
-# EXACT versions from WebZjs workspace (git repo)
-zcash_primitives = { git = "https://github.com/ChainSafe/librustzcash", rev = "46e8ee0937b61fdbb417df7c663f62e6945d8090" }
-zcash_proofs = { git = "https://github.com/ChainSafe/librustzcash", rev = "46e8ee0937b61fdbb417df7c663f62e6945d8090", default-features = false, features = ["bundled-prover"] }
-zcash_client_backend = { git = "https://github.com/ChainSafe/librustzcash", rev = "46e8ee0937b61fdbb417df7c663f62e6945d8090", default-features = false, features = ["wasm-bindgen"] }
-
-orchard = { version = "0.10.1", default-features = false }
-
-[profile.release]
-opt-level = "s"
-lto = true

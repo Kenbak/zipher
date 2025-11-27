@@ -1,54 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '@/lib/storage/store';
 import { useWebZjs } from '@/context/WebzjsContext';
-import { getVaultData } from '@/lib/storage/secure-storage';
-import { initOffscreenWallet, sendTransactionOffscreen } from '@/lib/offscreen-manager';
 
 export function Send() {
   const navigateTo = useAppStore((state) => state.navigateTo);
-  const { state: webzjsState, syncWallet } = useWebZjs();
+  const { state: webzjsState, sendTransaction } = useWebZjs();
 
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
   const [error, setError] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
   const [txid, setTxid] = useState('');
 
   const balance = Number(webzjsState.balance) / 100_000_000; // Convert zatoshis to ZEC
-
-  // Initialize offscreen wallet on mount
-  useEffect(() => {
-    const initOffscreen = async () => {
-      try {
-        console.log('[Send] Initializing offscreen wallet...');
-        setIsInitializing(true);
-
-        const vaultData = getVaultData();
-        if (!vaultData?.seedPhrase) {
-          throw new Error('Seed phrase not available');
-        }
-
-        // Initialize WebZjs in offscreen + sync
-        await initOffscreenWallet(
-          vaultData.seedPhrase,
-          'Account 1',
-          0,
-          vaultData.birthdayHeight
-        );
-
-        console.log('[Send] ✅ Offscreen wallet ready!');
-        setIsInitializing(false);
-      } catch (err) {
-        console.error('[Send] Failed to init offscreen:', err);
-        setError('Failed to initialize transaction engine. Please try again.');
-        setIsInitializing(false);
-      }
-    };
-
-    initOffscreen();
-  }, []);
 
   const handleSend = async () => {
     setError('');
@@ -79,29 +44,15 @@ export function Send() {
     setIsSending(true);
 
     try {
-      console.log('[Send] Sending transaction via offscreen...');
-
-      // Get seed phrase for signing
-      const vaultData = getVaultData();
-      if (!vaultData?.seedPhrase) {
-        throw new Error('Seed phrase not available. Please unlock wallet.');
-      }
-
-      // Send via offscreen document
-      const resultTxid = await sendTransactionOffscreen(
+      console.log('[Send] Sending transaction...');
+      const resultTxid = await sendTransaction(
         recipient,
         parseFloat(amount),
-        vaultData.seedPhrase,
         memo || undefined
       );
 
       console.log('[Send] ✅ Transaction sent! TXID:', resultTxid);
       setTxid(resultTxid);
-
-      // Trigger sync to update balance
-      setTimeout(() => {
-        syncWallet();
-      }, 5000);
 
       // Clear form
       setRecipient('');
@@ -114,36 +65,6 @@ export function Send() {
       setIsSending(false);
     }
   };
-
-  if (isInitializing) {
-    // Loading screen while offscreen initializes
-    return (
-      <div className="min-h-screen bg-cipher-bg text-white flex flex-col">
-        <header className="bg-cipher-surface border-b border-cipher-border p-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigateTo('home')}
-              className="p-2 hover:bg-cipher-border rounded-lg transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <h1 className="text-lg font-semibold">Send ZEC</h1>
-            <div className="w-9" />
-          </div>
-        </header>
-
-        <main className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cipher-cyan mx-auto"></div>
-            <p className="text-gray-400">Initializing transaction engine...</p>
-            <p className="text-xs text-gray-500">This may take a few seconds</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   if (txid) {
     // Success screen
@@ -297,13 +218,13 @@ export function Send() {
           {/* Send Button */}
           <button
             onClick={handleSend}
-            disabled={!recipient || !amount || isSending || isInitializing}
+            disabled={!recipient || !amount || isSending}
             className="w-full bg-cipher-green hover:bg-cipher-green/90 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-cipher-bg font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
           >
             {isSending ? (
               <>
                 <div className="w-5 h-5 border-2 border-cipher-bg border-t-transparent rounded-full animate-spin mr-2" />
-                Generating proof (10-30s)...
+                Sending...
               </>
             ) : (
               'Send Transaction'

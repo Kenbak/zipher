@@ -327,8 +327,44 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Convert ZEC to zatoshis (1 ZEC = 100,000,000 zatoshis)
-        const zatoshis = BigInt(Math.floor(amount * 100_000_000));
+        const zatoshis = amount * 100_000_000;
 
+        console.log('[WebZjs] 🧪 TESTING PCZT FLOW...');
+        console.log('[WebZjs] 🔵 Step 1/4: Creating PCZT (client-side signing)...');
+        
+        // Test if pczt_create works in Chrome extension
+        try {
+          // @ts-ignore - pczt_create might not be in types yet
+          const pczt = await state.webWallet.pczt_create(
+            state.accountId,
+            toAddress,
+            zatoshis
+          );
+          
+          console.log('[WebZjs] ✅ PCZT CREATED AND SIGNED! This worked WITHOUT eval()! 🎉');
+          console.log('[WebZjs] PCZT type:', typeof pczt);
+          console.log('[WebZjs] PCZT:', pczt);
+          
+          // Serialize PCZT for backend
+          // @ts-ignore
+          const pcztBytes = pczt.serialize ? pczt.serialize() : pczt;
+          console.log('[WebZjs] PCZT serialized, ready to send to backend prover');
+          
+          throw new Error('✅ PCZT TEST SUCCESSFUL! Now we need to implement backend prover. Check console for details.');
+          
+        } catch (error: any) {
+          console.error('[WebZjs] ❌ PCZT test failed:', error);
+          
+          // If pczt_create doesn't exist, show helpful error
+          if (error.message?.includes('pczt_create')) {
+            throw new Error('WebZjs version does not support PCZT. Need to update WebZjs or use backend for full flow.');
+          }
+          
+          throw error;
+        }
+
+        // OLD FLOW (blocked by CSP eval())
+        /*
         // Step 1: Create proposal
         console.log('[WebZjs] Step 1/3: Creating proposal...');
         const proposal = await state.webWallet.propose_transfer(
@@ -357,6 +393,7 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
           .join('');
 
         console.log('[WebZjs] ✅ Transaction sent! TXID:', txid);
+        */
 
         // Update balance optimistically (subtract sent amount + estimated fee)
         const estimatedFee = BigInt(10_000); // 0.0001 ZEC fee estimate

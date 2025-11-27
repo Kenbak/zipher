@@ -12,7 +12,7 @@ console.log('[Offscreen] Starting WebZjs test...');
 
 // Register message handler IMMEDIATELY
 console.log('[Offscreen] Registering message listener...');
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('[Offscreen] Received message:', message);
 
   if (message.type === 'PING_OFFSCREEN') {

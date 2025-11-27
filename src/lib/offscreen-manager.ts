@@ -2,11 +2,33 @@
  * Offscreen Document Manager
  * 
  * Manages communication with the offscreen document for WebZjs operations.
+ * Uses chrome.runtime.sendMessage to communicate with offscreen via service worker relay.
  */
 
 const OFFSCREEN_DOCUMENT_PATH = 'offscreen/offscreen.html';
 
 let creating: Promise<void> | null = null;
+
+/**
+ * Send message to offscreen document (via service worker relay)
+ */
+async function sendToOffscreen(message: any): Promise<any> {
+  console.log('[OffscreenManager] Sending to offscreen via service worker:', message.type);
+  
+  // Send message - service worker will relay to offscreen
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage(message, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('[OffscreenManager] Error:', chrome.runtime.lastError);
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+      
+      console.log('[OffscreenManager] Response:', response);
+      resolve(response);
+    });
+  });
+}
 
 /**
  * Ensure offscreen document exists
@@ -41,10 +63,7 @@ async function ensureOffscreenDocument(): Promise<void> {
     while (!ready && attempts < 20) {
       await new Promise(resolve => setTimeout(resolve, 500));
       try {
-        const response: any = await Promise.race([
-          chrome.runtime.sendMessage({ type: 'PING_OFFSCREEN' }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 500))
-        ]);
+        const response: any = await sendToOffscreen({ type: 'PING_OFFSCREEN' });
         if (response?.pong) {
           ready = true;
           console.log('[OffscreenManager] ✅ Offscreen ready!');
@@ -73,7 +92,7 @@ export async function initOffscreenWallet(
 
   console.log('[OffscreenManager] Initializing WebZjs wallet in offscreen...');
 
-  const response: any = await chrome.runtime.sendMessage({
+  const response: any = await sendToOffscreen({
     type: 'INIT_WEBZJS',
     data: { seedPhrase, accountName, accountHdIndex, birthdayHeight },
   });
@@ -98,7 +117,7 @@ export async function sendTransactionOffscreen(
 
   console.log('[OffscreenManager] Sending transaction via offscreen...');
 
-  const response: any = await chrome.runtime.sendMessage({
+  const response: any = await sendToOffscreen({
     type: 'SEND_TRANSACTION',
     data: { toAddress, amount, seedPhrase, memo },
   });
@@ -123,4 +142,3 @@ export async function closeOffscreen(): Promise<void> {
     console.log('[OffscreenManager] Could not close offscreen (might not exist)');
   }
 }
-

@@ -114,6 +114,13 @@ chrome.runtime.onMessage.addListener((
   _sender,
   sendResponse: (response: MessageResponse) => void
 ) => {
+  // FILTER: Let offscreen document handle these messages
+  const offscreenMessages = ['PING_OFFSCREEN', 'TEST_WEBZJS', 'INIT_WEBZJS', 'SEND_TRANSACTION'];
+  if (offscreenMessages.includes(message.type)) {
+    // Don't handle in service worker - let offscreen document handle it
+    return false; // Explicitly return false to allow other listeners
+  }
+
   console.log('[ServiceWorker] Message received:', message.type);
 
   // Handle async operations
@@ -178,13 +185,6 @@ chrome.runtime.onMessage.addListener((
         }
 
         default: {
-          // Ignore messages for offscreen document (don't respond from service worker)
-          const offscreenMessages = ['PING_OFFSCREEN', 'TEST_WEBZJS', 'INIT_WEBZJS', 'SEND_TRANSACTION'];
-          if (offscreenMessages.includes(message.type)) {
-            console.log('[ServiceWorker] Ignoring message for offscreen document:', message.type);
-            return; // Don't respond, let offscreen handle it
-          }
-          
           sendResponse({
             success: false,
             requestId: message.requestId,

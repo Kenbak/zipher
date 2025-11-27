@@ -128,15 +128,15 @@ const formatBalance = (zatoshis: bigint) => {
 
 ## 📊 What's Working
 
-✅ Wallet creation  
-✅ Real Zcash address  
-✅ Connected to RPC  
-✅ Blockchain sync  
-✅ Balance display  
-✅ Auto-refresh (30s)  
-✅ Manual refresh  
-✅ Loading states  
-✅ Last sync time  
+✅ Wallet creation
+✅ Real Zcash address
+✅ Connected to RPC
+✅ Blockchain sync
+✅ Balance display
+✅ Auto-refresh (30s)
+✅ Manual refresh
+✅ Loading states
+✅ Last sync time
 
 ---
 
@@ -167,6 +167,5 @@ const formatBalance = (zatoshis: bigint) => {
 
 ---
 
-**Status**: ✅ Ready to test with real testnet ZEC!  
+**Status**: ✅ Ready to test with real testnet ZEC!
 **Last Updated**: 2025-11-27
-

@@ -39,6 +39,7 @@ export interface WebZjsState {
   error: Error | null | string;
   balance: bigint;
   accountId: number | null;
+  syncFailCount: number; // Track consecutive sync failures
 }
 
 // Actions
@@ -52,6 +53,8 @@ type Action =
   | { type: 'set-balance'; payload: bigint }
   | { type: 'set-account-id'; payload: number }
   | { type: 'set-error'; payload: Error | null | string }
+  | { type: 'increment-sync-fail-count' }
+  | { type: 'reset-sync-fail-count' }
   | { type: 'reset' };
 
 const initialState: WebZjsState = {
@@ -64,6 +67,7 @@ const initialState: WebZjsState = {
   error: null,
   balance: 0n,
   accountId: null,
+  syncFailCount: 0,
 };
 
 function reducer(state: WebZjsState, action: Action): WebZjsState {
@@ -86,6 +90,10 @@ function reducer(state: WebZjsState, action: Action): WebZjsState {
       return { ...state, accountId: action.payload };
     case 'set-error':
       return { ...state, error: action.payload };
+    case 'increment-sync-fail-count':
+      return { ...state, syncFailCount: state.syncFailCount + 1 };
+    case 'reset-sync-fail-count':
+      return { ...state, syncFailCount: 0 };
     case 'reset':
       return initialState;
     default:
@@ -139,9 +147,19 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
       console.log('[WebZjs] Initializing WASM...');
       await initWebzJSWallet();
 
-      console.log('[WebZjs] Initializing thread pool...');
-      const concurrency = navigator.hardwareConcurrency || 4;
-      await initThreadPool(concurrency);
+      // Skip thread pool initialization (Chrome MV3 doesn't allow 'unsafe-eval')
+      // WebZjs will run in single-threaded mode (slower but works)
+      console.log('[WebZjs] ℹ️ Running in single-threaded mode (Chrome MV3 restriction)');
+
+      // Try to init thread pool, but ignore if it fails
+      try {
+        console.log('[WebZjs] Attempting thread pool initialization...');
+        const concurrency = 1; // Use 1 thread to avoid eval()
+        await initThreadPool(concurrency);
+        console.log('[WebZjs] Thread pool initialized');
+      } catch (err) {
+        console.warn('[WebZjs] Thread pool failed (expected in MV3), continuing single-threaded:', err);
+      }
 
       dispatch({ type: 'set-initialized', payload: true });
       console.log('[WebZjs] ✅ Initialized successfully!');
@@ -198,11 +216,11 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
   );
 
   /**
-   * Sync wallet with blockchain
-   * This fetches all transactions and updates balance
+   * Sync wallet with blockchain using our CUSTOM WASM
+   * NO eval(), NO workers, 100% Chrome MV3 compatible!
    */
   const syncWallet = useCallback(async () => {
-    if (!state.webWallet || state.accountId === null) {
+    if (!state.currentAddress || state.accountId === null) {
       console.warn('[WebZjs] Cannot sync: wallet not initialized');
       return;
     }
@@ -212,27 +230,51 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    // Stop retrying after 3 consecutive failures
+    if (state.syncFailCount >= 3) {
+      console.error('[WebZjs] ❌ Too many sync failures, stopping auto-sync');
+      dispatch({ type: 'set-error', payload: 'Sync failed multiple times. Please check your connection and refresh the extension.' });
+      return;
+    }
+
     try {
       dispatch({ type: 'set-syncing', payload: true });
-      console.log('[WebZjs] 🔄 Syncing wallet...');
+      dispatch({ type: 'set-error', payload: null }); // Clear previous errors
+      console.log('[WebZjs] 🔄 Syncing wallet with custom WASM...');
 
-      // Sync with blockchain
-      await state.webWallet.sync();
+      // Get seed phrase from storage (already decrypted in memory)
+      const { getVaultData } = await import('@/lib/storage/secure-storage');
+      const vaultData = getVaultData();
 
-      // Get updated balance
-      const balance = await state.webWallet.get_balance(state.accountId);
-      dispatch({ type: 'set-balance', payload: balance });
+      if (!vaultData?.seedPhrase) {
+        throw new Error('Seed phrase not found. Please unlock wallet.');
+      }
+
+      // Use our custom sync (replaces wallet.sync())
+      const { syncWallet: customSync } = await import('@/lib/zcash-sync');
+      const walletBalance = await customSync(
+        state.currentAddress,
+        vaultData.seedPhrase,
+        vaultData.birthdayHeight || undefined,
+        vaultData.createdAt // For old wallet migration
+      );
+
+      // Convert ZEC to zatoshis for state
+      const zatoshis = BigInt(Math.floor(walletBalance.balance * 100_000_000));
+      dispatch({ type: 'set-balance', payload: zatoshis });
       dispatch({ type: 'set-last-sync-time', payload: Date.now() });
+      dispatch({ type: 'reset-sync-fail-count' }); // Reset on success
 
-      const zec = Number(balance) / 100_000_000;
-      console.log('[WebZjs] ✅ Sync complete! Balance:', zec, 'ZEC');
+      console.log('[WebZjs] ✅ Sync complete! Balance:', walletBalance.balance, 'ZEC');
+      console.log('[WebZjs] Transactions:', walletBalance.transactions.length);
     } catch (error) {
       console.error('[WebZjs] Sync failed:', error);
-      // Don't set error, just log it (sync failures are common)
+      dispatch({ type: 'increment-sync-fail-count' });
+      dispatch({ type: 'set-error', payload: error instanceof Error ? error.message : String(error) });
     } finally {
       dispatch({ type: 'set-syncing', payload: false });
     }
-  }, [state.webWallet, state.accountId, state.isSyncing]);
+  }, [state.webWallet, state.accountId, state.currentAddress, state.isSyncing, state.syncFailCount]);
 
   /**
    * Get current address
@@ -270,6 +312,12 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    // Stop auto-sync if too many failures
+    if (state.syncFailCount >= 3) {
+      console.error('[WebZjs] Auto-sync stopped due to too many failures');
+      return;
+    }
+
     console.log('[WebZjs] Starting auto-sync (every 30s)...');
 
     // Initial sync
@@ -277,15 +325,18 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
 
     // Set up interval for periodic sync
     const intervalId = setInterval(() => {
-      console.log('[WebZjs] Auto-sync triggered');
-      syncWallet();
+      if (state.syncFailCount < 3) {
+        console.log('[WebZjs] Auto-sync triggered');
+        syncWallet();
+      }
     }, 30000); // 30 seconds
 
     return () => {
       console.log('[WebZjs] Stopping auto-sync');
       clearInterval(intervalId);
     };
-  }, [state.webWallet, state.accountId, syncWallet]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.webWallet, state.accountId, state.syncFailCount]); // Remove syncWallet from deps
 
   const value: WebZjsContextType = {
     state,

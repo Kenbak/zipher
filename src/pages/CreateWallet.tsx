@@ -5,6 +5,7 @@ import { useAppStore } from '@/lib/storage/store';
 export function CreateWallet() {
   const navigateTo = useAppStore((state) => state.navigateTo);
   const setGeneratedSeed = useAppStore((state) => state.setGeneratedSeed);
+  const setBirthdayHeight = useAppStore((state) => state.setBirthdayHeight);
 
   const [seedPhrase, setSeedPhrase] = useState<string[]>([]);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -15,7 +16,22 @@ export function CreateWallet() {
     // Generate 24-word seed phrase
     const mnemonic = generateMnemonic(256); // 256 bits = 24 words
     setSeedPhrase(mnemonic.split(' '));
-  }, []);
+
+    // Fetch actual current block height from lightwalletd
+    const fetchAndSetBirthday = async () => {
+      try {
+        const { fetchCurrentBlockHeight } = await import('@/lib/zcash-sync');
+        const currentHeight = await fetchCurrentBlockHeight();
+        setBirthdayHeight(currentHeight);
+        console.log('[CreateWallet] ✅ Birthday height set to:', currentHeight);
+      } catch (error) {
+        console.error('[CreateWallet] Failed to fetch birthday height:', error);
+        // Fallback is handled in fetchCurrentBlockHeight
+      }
+    };
+
+    fetchAndSetBirthday();
+  }, [setBirthdayHeight]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(seedPhrase.join(' '));

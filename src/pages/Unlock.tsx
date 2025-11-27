@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useAppStore } from '@/lib/storage/store';
-import { unlockVault } from '@/lib/storage/secure-storage';
-import { initializeWallet } from '@/lib/wallet-manager';
+import { unlockVault, getVaultData } from '@/lib/storage/secure-storage';
+import { useWebZjs } from '@/context/WebzjsContext';
 
 export function Unlock() {
   const navigateTo = useAppStore((state) => state.navigateTo);
+  const { initializeWebZjs, createWalletFromSeed } = useWebZjs();
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,9 +29,21 @@ export function Unlock() {
 
       console.log('[Unlock] ✅ Vault unlocked!');
 
-      // Initialize wallet (this will generate address from decrypted seed)
-      console.log('[Unlock] Initializing wallet...');
-      await initializeWallet();
+      // Initialize WebZjs in popup (NOT service worker!)
+      console.log('[Unlock] Initializing WebZjs...');
+      await initializeWebZjs();
+
+      // Get vault data and create wallet
+      const vaultData = getVaultData();
+      if (!vaultData?.seedPhrase) {
+        throw new Error('Vault data not found after unlock');
+      }
+
+      console.log('[Unlock] Creating wallet from seed...');
+      await createWalletFromSeed(
+        vaultData.seedPhrase,
+        vaultData.birthdayHeight || undefined
+      );
 
       console.log('[Unlock] ✅ Wallet ready!');
 

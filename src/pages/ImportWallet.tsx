@@ -6,7 +6,7 @@ export function ImportWallet() {
   const navigateTo = useAppStore((state) => state.navigateTo);
   const setImportedSeed = useAppStore((state) => state.setImportedSeed);
   const setBirthdayHeight = useAppStore((state) => state.setBirthdayHeight);
-  
+
   const [seedInput, setSeedInput] = useState('');
   const [birthdayInput, setBirthdayInput] = useState('');
   const [error, setError] = useState('');
@@ -155,4 +155,3 @@ export function ImportWallet() {
     </div>
   );
 }
-

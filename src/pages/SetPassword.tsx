@@ -6,7 +6,7 @@ export function SetPassword() {
   const generatedSeed = useAppStore((state) => state.generatedSeed);
   const importedSeed = useAppStore((state) => state.importedSeed);
   const birthdayHeight = useAppStore((state) => state.birthdayHeight);
-  
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,7 +18,7 @@ export function SetPassword() {
   // Password strength calculation
   const getPasswordStrength = () => {
     if (password.length === 0) return { score: 0, label: '', color: '' };
-    
+
     let score = 0;
     if (password.length >= 8) score++;
     if (password.length >= 12) score++;
@@ -56,22 +56,27 @@ export function SetPassword() {
     setIsCreating(true);
 
     try {
-      // TODO: Implement actual wallet creation
-      // 1. Encrypt seed phrase with password
-      // 2. Store encrypted seed in chrome.storage
-      // 3. Initialize WebZjs wallet
-      // 4. Save wallet state
+      console.log('[SetPassword] Creating encrypted vault...');
       
-      console.log('Creating wallet with seed:', seedPhrase.substring(0, 20) + '...');
-      console.log('Birthday height:', birthdayHeight);
+      // Import secure storage
+      const { createVault } = await import('@/lib/storage/secure-storage');
       
-      // Simulate async operation
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Create encrypted vault
+      await createVault(password, {
+        seedPhrase: seedPhrase,
+        accountName: 'Account 1',
+        birthdayHeight: birthdayHeight,
+        createdAt: Date.now(),
+      });
+      
+      console.log('[SetPassword] Vault created successfully!');
+      console.log('[SetPassword] Seed is encrypted with AES-256-GCM');
+      console.log('[SetPassword] Password is NOT stored (only encryption key derived from it)');
       
       // Navigate to home
       navigateTo('home');
     } catch (err) {
-      console.error('Failed to create wallet:', err);
+      console.error('[SetPassword] Failed to create wallet:', err);
       setError('Failed to create wallet. Please try again.');
     } finally {
       setIsCreating(false);
@@ -176,7 +181,7 @@ export function SetPassword() {
           {/* Warning */}
           <div className="bg-cipher-orange/10 border border-cipher-orange/30 rounded-lg p-3">
             <p className="text-xs text-cipher-orange">
-              ⚠️ This password encrypts your wallet on this device. 
+              ⚠️ This password encrypts your wallet on this device.
               If you forget it, you'll need your seed phrase to recover.
             </p>
           </div>
@@ -201,4 +206,3 @@ export function SetPassword() {
     </div>
   );
 }
-

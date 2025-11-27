@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/storage/store';
 export function CreateWallet() {
   const navigateTo = useAppStore((state) => state.navigateTo);
   const setGeneratedSeed = useAppStore((state) => state.setGeneratedSeed);
-  
+
   const [seedPhrase, setSeedPhrase] = useState<string[]>([]);
   const [isRevealed, setIsRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -120,7 +120,7 @@ export function CreateWallet() {
                 className="mt-1 w-4 h-4 rounded border-cipher-border bg-cipher-bg text-cipher-cyan focus:ring-cipher-cyan"
               />
               <span className="text-sm">
-                I have written down my seed phrase and stored it in a safe place. 
+                I have written down my seed phrase and stored it in a safe place.
                 I understand that I will lose access to my funds if I lose this seed phrase.
               </span>
             </label>
@@ -139,4 +139,3 @@ export function CreateWallet() {
     </div>
   );
 }
-

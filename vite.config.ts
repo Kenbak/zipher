@@ -13,6 +13,19 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Polyfill Buffer for bip39
+      buffer: 'buffer',
+    },
+  },
+  define: {
+    // Make Buffer available globally
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
     },
   },
   build: {

@@ -4,7 +4,7 @@ import { useAppStore } from '@/lib/storage/store';
 export function ConfirmSeed() {
   const navigateTo = useAppStore((state) => state.navigateTo);
   const generatedSeed = useAppStore((state) => state.generatedSeed);
-  
+
   const [seedWords, setSeedWords] = useState<string[]>([]);
   const [randomIndices, setRandomIndices] = useState<number[]>([]);
   const [userInputs, setUserInputs] = useState<string[]>(['', '', '']);
@@ -127,4 +127,3 @@ export function ConfirmSeed() {
     </div>
   );
 }
-

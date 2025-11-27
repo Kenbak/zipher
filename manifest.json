@@ -43,7 +43,11 @@
 
   "web_accessible_resources": [
     {
-      "resources": ["icons/*"],
+      "resources": [
+        "icons/*",
+        "lib/webzjs-wallet/*",
+        "lib/webzjs-wallet/snippets/*"
+      ],
       "matches": ["<all_urls>"]
     }
   ]

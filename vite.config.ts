@@ -33,6 +33,11 @@ export default defineConfig({
       input: {
         popup: 'index.html',
       },
+      external: [
+        // Exclude WebZjs from Vite build (loaded dynamically in service worker)
+        '@chainsafe/webzjs-wallet',
+        '@chainsafe/webzjs-keys',
+      ],
     },
   },
   server: {

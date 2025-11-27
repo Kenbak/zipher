@@ -29,6 +29,9 @@ dist/
 build/
 .cache/
 
+# WebZjs (copied during build)
+dist/lib/webzjs-wallet/
+
 # Environment
 .env
 .env.local

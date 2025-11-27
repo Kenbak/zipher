@@ -22,8 +22,31 @@ export function TestOffscreen() {
 
       console.log('[TestOffscreen] ✅ Offscreen document created!');
 
-      // Wait a bit for offscreen to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for offscreen to be ready
+      console.log('[TestOffscreen] Waiting for offscreen to be ready...');
+      let ready = false;
+      let attempts = 0;
+      while (!ready && attempts < 10) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        try {
+          // Try to ping offscreen
+          const pingResponse = await Promise.race([
+            chrome.runtime.sendMessage({ type: 'PING_OFFSCREEN' }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 500))
+          ]);
+          if (pingResponse?.pong) {
+            ready = true;
+            console.log('[TestOffscreen] Offscreen is ready!');
+          }
+        } catch (e) {
+          attempts++;
+          console.log(`[TestOffscreen] Waiting... (attempt ${attempts})`);
+        }
+      }
+
+      if (!ready) {
+        throw new Error('Offscreen document did not respond');
+      }
 
       // Send test message
       console.log('[TestOffscreen] Sending test message...');

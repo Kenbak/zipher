@@ -7,11 +7,19 @@
 
 import initWebzJSWallet, { initThreadPool, WebWallet } from '@chainsafe/webzjs-wallet';
 
+console.log('[Offscreen] 🚀 Offscreen document loaded!');
 console.log('[Offscreen] Starting WebZjs test...');
 
-// Message handler from service worker
+// Register message handler IMMEDIATELY
+console.log('[Offscreen] Registering message listener...');
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('[Offscreen] Received message:', message);
+
+  if (message.type === 'PING_OFFSCREEN') {
+    console.log('[Offscreen] Responding to ping');
+    sendResponse({ pong: true });
+    return true;
+  }
 
   if (message.type === 'TEST_WEBZJS') {
     testWebZjs().then(result => {
@@ -127,4 +135,5 @@ async function sendTransaction(data: {
   return txid;
 }
 
+console.log('[Offscreen] ✅ Message listener registered!');
 console.log('[Offscreen] Offscreen document ready!');

@@ -178,6 +178,12 @@ chrome.runtime.onMessage.addListener((
         }
 
         default: {
+          // Ignore messages for offscreen document (don't respond)
+          if (message.type === 'PING_OFFSCREEN' || message.type === 'TEST_WEBZJS') {
+            console.log('[ServiceWorker] Ignoring message for offscreen document:', message.type);
+            return; // Don't respond, let offscreen handle it
+          }
+          
           sendResponse({
             success: false,
             requestId: message.requestId,

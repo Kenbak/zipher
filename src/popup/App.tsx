@@ -10,6 +10,7 @@ import { ImportWallet } from '@/pages/ImportWallet';
 import { SetPassword } from '@/pages/SetPassword';
 import { Home } from '@/pages/Home';
 import { Send } from '@/pages/Send';
+import { TestOffscreen } from '@/pages/TestOffscreen';
 
 function AppContent() {
   const currentPage = useAppStore((state) => state.currentPage);
@@ -51,6 +52,8 @@ function AppContent() {
       return <Home />;
     case 'send':
       return <Send />;
+    case 'test-offscreen':
+      return <TestOffscreen />;
     default:
       return <Unlock />;
   }

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useWalletState } from '@/lib/storage/wallet-state';
+import { useAppStore } from '@/lib/storage/store';
 import { useWebZjs } from '@/context/WebzjsContext';
 import { getVaultData } from '@/lib/storage/secure-storage';
 import type { DecryptedTransaction } from '@/lib/zcash-sync';
 
 export function Home() {
+  const navigateTo = useAppStore((state) => state.navigateTo);
   const walletAddress = useWalletState((state) => state.address);
   const setAddress = useWalletState((state) => state.setAddress);
   const [copied, setCopied] = useState(false);
@@ -197,7 +199,10 @@ export function Home() {
               <span className="text-xs font-medium">Receive</span>
             </button>
 
-            <button className="flex flex-col items-center space-y-2 p-4 hover:bg-cipher-surface rounded-lg transition-colors">
+            <button 
+              onClick={() => navigateTo('send')}
+              className="flex flex-col items-center space-y-2 p-4 hover:bg-cipher-surface rounded-lg transition-colors"
+            >
               <div className="w-12 h-12 bg-cipher-green/10 rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-cipher-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

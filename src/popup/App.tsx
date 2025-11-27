@@ -9,6 +9,7 @@ import { ConfirmSeed } from '@/pages/ConfirmSeed';
 import { ImportWallet } from '@/pages/ImportWallet';
 import { SetPassword } from '@/pages/SetPassword';
 import { Home } from '@/pages/Home';
+import { Send } from '@/pages/Send';
 
 function AppContent() {
   const currentPage = useAppStore((state) => state.currentPage);
@@ -48,6 +49,8 @@ function AppContent() {
       return <SetPassword />;
     case 'home':
       return <Home />;
+    case 'send':
+      return <Send />;
     default:
       return <Unlock />;
   }

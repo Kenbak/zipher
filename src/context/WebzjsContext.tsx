@@ -115,6 +115,7 @@ interface WebZjsContextType {
   syncWallet: () => Promise<void>;
   getAddress: (accountId: number) => Promise<string>;
   getBalance: (accountId: number) => Promise<bigint>;
+  sendTransaction: (toAddress: string, amount: number, memo?: string) => Promise<string>;
 }
 
 const WebZjsContext = createContext<WebZjsContextType | null>(null);
@@ -306,6 +307,50 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
     [state.webWallet]
   );
 
+  /**
+   * Send transaction
+   */
+  const sendTransaction = useCallback(
+    async (toAddress: string, amount: number, memo?: string): Promise<string> => {
+      if (!state.webWallet || state.accountId === null) {
+        throw new Error('Wallet not initialized');
+      }
+
+      console.log('[WebZjs] Sending transaction:', { toAddress, amount, memo });
+
+      try {
+        // Convert ZEC to zatoshis (1 ZEC = 100,000,000 zatoshis)
+        const zatoshis = BigInt(Math.floor(amount * 100_000_000));
+
+        // Send transaction
+        const txid = await state.webWallet.send_transaction(
+          state.accountId,
+          toAddress,
+          zatoshis,
+          memo || ''
+        );
+
+        console.log('[WebZjs] ✅ Transaction sent! TXID:', txid);
+
+        // Update balance optimistically (subtract sent amount + estimated fee)
+        const estimatedFee = BigInt(10_000); // 0.0001 ZEC fee estimate
+        const newBalance = state.balance - zatoshis - estimatedFee;
+        dispatch({ type: 'set-balance', payload: newBalance > 0n ? newBalance : 0n });
+
+        // Trigger sync to update balance from blockchain
+        setTimeout(() => {
+          syncWallet();
+        }, 5000); // Wait 5s then sync
+
+        return txid;
+      } catch (error) {
+        console.error('[WebZjs] Send transaction failed:', error);
+        throw error;
+      }
+    },
+    [state.webWallet, state.accountId, state.balance, syncWallet]
+  );
+
   // Auto-sync every 30 seconds when wallet is initialized
   useEffect(() => {
     if (!state.webWallet || state.accountId === null) {
@@ -346,6 +391,7 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
     syncWallet,
     getAddress,
     getBalance,
+    sendTransaction,
   };
 
   return (

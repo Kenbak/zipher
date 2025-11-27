@@ -14,6 +14,8 @@ export function Send() {
   const [txid, setTxid] = useState('');
 
   const balance = Number(webzjsState.balance) / 100_000_000; // Convert zatoshis to ZEC
+  const ZEC_PRICE_USD = 45; // Example price, should be fetched from API
+  const amountUSD = amount ? (parseFloat(amount) * ZEC_PRICE_USD).toFixed(2) : '0.00';
 
   const handleSend = async () => {
     setError('');
@@ -151,15 +153,9 @@ export function Send() {
       {/* Main Content */}
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="space-y-6">
-          {/* Balance Display */}
-          <div className="bg-cipher-surface border border-cipher-border rounded-lg p-4">
-            <p className="text-sm text-gray-400 mb-1">Available Balance</p>
-            <p className="text-2xl font-bold text-cipher-cyan">{balance.toFixed(8)} ZEC</p>
-          </div>
-
           {/* Recipient Address */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Recipient Address</label>
+            <label className="text-sm font-medium text-gray-400">Recipient Address</label>
             <input
               type="text"
               value={recipient}
@@ -172,30 +168,27 @@ export function Send() {
 
           {/* Amount */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Amount (ZEC)</label>
-              <button
-                onClick={() => setAmount(balance.toString())}
-                className="text-xs text-cipher-cyan hover:underline"
-                disabled={isSending}
-              >
-                Max
-              </button>
-            </div>
+            <label className="text-sm font-medium text-gray-400">Amount</label>
             <input
               type="number"
               step="0.00000001"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00000000"
-              className="w-full bg-cipher-surface border border-cipher-border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cipher-cyan"
+              placeholder="0.00"
+              className="w-full bg-cipher-surface border border-cipher-border rounded-lg px-4 py-3 text-white text-2xl font-semibold placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cipher-cyan"
               disabled={isSending}
             />
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">≈ ${amountUSD} USD</span>
+              <span className="text-gray-500">
+                Available: <span className="text-white font-medium">{balance.toFixed(4)} ZEC</span>
+              </span>
+            </div>
           </div>
 
           {/* Memo (Optional) */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Memo (Optional)</label>
+            <label className="text-sm font-medium text-gray-400">Memo (Optional)</label>
             <textarea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
@@ -230,20 +223,6 @@ export function Send() {
               'Send Transaction'
             )}
           </button>
-
-          {/* Info Box */}
-          <div className="bg-cipher-surface/50 border border-cipher-border/50 rounded-lg p-4 space-y-2">
-            <div className="flex items-start space-x-2">
-              <svg className="w-5 h-5 text-cipher-cyan mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div className="text-xs text-gray-400 space-y-1">
-                <p>• Transactions are fully shielded and private</p>
-                <p>• Confirmation takes ~75 seconds (1 block)</p>
-                <p>• Network fee: ~0.0001 ZEC</p>
-              </div>
-            </div>
-          </div>
         </div>
       </main>
     </div>

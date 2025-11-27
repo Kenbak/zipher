@@ -10,6 +10,7 @@ import { ImportWallet } from '@/pages/ImportWallet';
 import { SetPassword } from '@/pages/SetPassword';
 import { Home } from '@/pages/Home';
 import { Send } from '@/pages/Send';
+import { Settings } from '@/pages/Settings';
 
 function AppContent() {
   const currentPage = useAppStore((state) => state.currentPage);
@@ -51,6 +52,8 @@ function AppContent() {
       return <Home />;
     case 'send':
       return <Send />;
+    case 'settings':
+      return <Settings />;
     default:
       return <Unlock />;
   }

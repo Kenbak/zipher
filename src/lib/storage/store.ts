@@ -10,7 +10,9 @@ export type Page =
   | 'confirm-seed'
   | 'import-wallet'
   | 'set-password'
-  | 'home';
+  | 'home'
+  | 'send'
+  | 'settings';
 
 interface AppState {
   // Navigation

@@ -13,6 +13,7 @@ export function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [transactions, setTransactions] = useState<DecryptedTransaction[]>([]);
+  const [balanceVisible, setBalanceVisible] = useState(true);
 
   const { state: webzjsState, createWalletFromSeed, initializeWebZjs, syncWallet } = useWebZjs();
 
@@ -243,7 +244,24 @@ export function Home() {
 
           {/* Balance Card - Compact */}
           <div className="bg-cipher-surface border border-cipher-border rounded-2xl p-5">
-            <p className="text-xs uppercase tracking-wide text-gray-500 mb-3">Total Balance</p>
+            <div className="flex items-center space-x-2 mb-3">
+              <p className="text-xs uppercase tracking-wide text-gray-500">Total Balance</p>
+              <button
+                onClick={() => setBalanceVisible(!balanceVisible)}
+                className="p-1 hover:bg-cipher-border rounded transition-colors"
+              >
+                {balanceVisible ? (
+                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                ) : (
+                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                )}
+              </button>
+            </div>
             {webzjsState.isSyncing && webzjsState.balance === 0n ? (
               <div className="flex items-center space-x-3 py-2">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cipher-cyan"></div>
@@ -252,17 +270,25 @@ export function Home() {
             ) : (
               <>
                 <div className="flex items-center space-x-2 mb-2">
-                  <p className="text-3xl font-bold text-white">{balance}</p>
-                  <div className="flex items-center space-x-2">
-                    <img
-                      src="/icons/zcash-logo.svg"
-                      alt="Zcash"
-                      className="w-8 h-8"
-                    />
-                    <span className="text-xl font-semibold text-white">ZEC</span>
-                  </div>
+                  {balanceVisible ? (
+                    <>
+                      <p className="text-3xl font-bold text-white">{balance}</p>
+                      <div className="flex items-center space-x-2">
+                        <img
+                          src="/icons/zcash-logo.svg"
+                          alt="Zcash"
+                          className="w-8 h-8"
+                        />
+                        <span className="text-xl font-semibold text-white">ZEC</span>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-3xl font-bold text-white">••••••</p>
+                  )}
                 </div>
-                <p className="text-sm text-gray-500">≈ ${balanceUSD} USD</p>
+                <p className="text-sm text-gray-500">
+                  {balanceVisible ? `≈ $${balanceUSD} USD` : '≈ $•••• USD'}
+                </p>
               </>
             )}
           </div>
@@ -372,7 +398,10 @@ export function Home() {
             <span className="text-xs font-medium">Activity</span>
           </button>
 
-          <button className="flex flex-col items-center py-2.5 px-3 text-gray-500 hover:text-gray-300 rounded-lg transition-colors">
+          <button
+            onClick={() => navigateTo('settings')}
+            className="flex flex-col items-center py-2.5 px-3 text-gray-500 hover:text-gray-300 rounded-lg transition-colors"
+          >
             <svg className="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

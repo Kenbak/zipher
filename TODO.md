@@ -226,7 +226,6 @@
 
 ---
 
-**Last Updated**: 2025-11-27  
-**Current Sprint**: Week 0 (Setup)  
+**Last Updated**: 2025-11-27
+**Current Sprint**: Week 0 (Setup)
 **Next Milestone**: Extension loads in Chrome with basic UI
-

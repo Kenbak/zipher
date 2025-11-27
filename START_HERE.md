@@ -21,7 +21,7 @@ This file will guide you through the first steps when opening this project in a 
 ## 🎯 Quick Context
 
 ### What is Ziphers?
-A **non-custodial Zcash wallet** browser extension (Chrome/Brave/Edge).  
+A **non-custodial Zcash wallet** browser extension (Chrome/Brave/Edge).
 Think: **Leather** (Bitcoin) or **Unisat**, but for **Zcash** with privacy focus.
 
 ### Built By
@@ -294,4 +294,3 @@ First concrete task: **Create manifest.json**
 **Good luck! Let's build the best Zcash wallet! 💚🔷**
 
 *~ The CipherScan Team*
-

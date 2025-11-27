@@ -1,19 +1,58 @@
 {
-  "name": "zcash-wallet-extension",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "ziphers-wallet",
+  "version": "0.1.0",
+  "description": "Privacy-first Zcash wallet browser extension by CipherScan",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+  },
+  "dependencies": {
+    "@chainsafe/webzjs-wallet": "file:../WebZjs/packages/webzjs-wallet",
+    "@chainsafe/webzjs-keys": "file:../WebZjs/packages/webzjs-keys",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^4.5.0",
+    "qrcode": "^1.5.3",
+    "bip39": "^3.1.0"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.23",
+    "@types/chrome": "^0.0.260",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/bip39": "^3.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kenbak/zcash-wallet-extension.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": [
+    "zcash",
+    "wallet",
+    "chrome-extension",
+    "privacy",
+    "cryptocurrency",
+    "webzjs"
+  ],
+  "author": "CipherScan Team",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/kenbak/zcash-wallet-extension/issues"
   },

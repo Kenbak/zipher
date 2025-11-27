@@ -27,7 +27,7 @@
 1. **Install** (when released):
    - Visit Chrome Web Store (link TBD)
    - Click "Add to Chrome"
-   
+
 2. **Setup**:
    - Create new wallet or import existing seed phrase
    - Set a strong password
@@ -219,4 +219,3 @@ Always:
 **Built with 💚 for privacy**
 
 *Ziphers by CipherScan - Where Privacy Meets Simplicity*
-

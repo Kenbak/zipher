@@ -63,13 +63,13 @@ export function ComponentName({ address }: Props) {
   // 4. Hooks
   const wallet = useWallet();
   const [state, setState] = useState();
-  
+
   // 5. Effects
   useEffect(() => {}, []);
-  
+
   // 6. Handlers
   const handleClick = () => {};
-  
+
   // 7. Render
   return <div></div>;
 }
@@ -164,11 +164,11 @@ export const useWalletStore = create<WalletStore>((set) => ({
 export function useBalance() {
   const [balance, setBalance] = useState<bigint>(0n);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     loadBalance();
   }, []);
-  
+
   async function loadBalance() {
     try {
       const bal = await getWallet().get_balance(0);
@@ -179,7 +179,7 @@ export function useBalance() {
       setLoading(false);
     }
   }
-  
+
   return { balance, loading, refresh: loadBalance };
 }
 ```
@@ -228,4 +228,3 @@ Before committing:
 - Privacy is the core value proposition
 - "Powered by CipherScan" branding
 - Open source, auditable, transparent
-

@@ -34,17 +34,23 @@ export interface WebZjsState {
   currentAddress: string | null;
   isInitialized: boolean;
   isInitializing: boolean;
+  isSyncing: boolean;
+  lastSyncTime: number | null;
   error: Error | null | string;
   balance: bigint;
+  accountId: number | null;
 }
 
 // Actions
 type Action =
   | { type: 'set-initializing'; payload: boolean }
   | { type: 'set-initialized'; payload: boolean }
+  | { type: 'set-syncing'; payload: boolean }
+  | { type: 'set-last-sync-time'; payload: number }
   | { type: 'set-web-wallet'; payload: WebWallet }
   | { type: 'set-address'; payload: string }
   | { type: 'set-balance'; payload: bigint }
+  | { type: 'set-account-id'; payload: number }
   | { type: 'set-error'; payload: Error | null | string }
   | { type: 'reset' };
 
@@ -53,8 +59,11 @@ const initialState: WebZjsState = {
   currentAddress: null,
   isInitialized: false,
   isInitializing: false,
+  isSyncing: false,
+  lastSyncTime: null,
   error: null,
   balance: 0n,
+  accountId: null,
 };
 
 function reducer(state: WebZjsState, action: Action): WebZjsState {
@@ -63,12 +72,18 @@ function reducer(state: WebZjsState, action: Action): WebZjsState {
       return { ...state, isInitializing: action.payload };
     case 'set-initialized':
       return { ...state, isInitialized: action.payload };
+    case 'set-syncing':
+      return { ...state, isSyncing: action.payload };
+    case 'set-last-sync-time':
+      return { ...state, lastSyncTime: action.payload };
     case 'set-web-wallet':
       return { ...state, webWallet: action.payload };
     case 'set-address':
       return { ...state, currentAddress: action.payload };
     case 'set-balance':
       return { ...state, balance: action.payload };
+    case 'set-account-id':
+      return { ...state, accountId: action.payload };
     case 'set-error':
       return { ...state, error: action.payload };
     case 'reset':
@@ -89,6 +104,7 @@ interface WebZjsContextType {
     accountHdIndex: number,
     birthdayHeight?: number | null
   ) => Promise<{ accountId: number; address: string }>;
+  syncWallet: () => Promise<void>;
   getAddress: (accountId: number) => Promise<string>;
   getBalance: (accountId: number) => Promise<bigint>;
 }
@@ -171,21 +187,52 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
       // Get address
       const address = await wallet.get_current_address(accountId);
       dispatch({ type: 'set-address', payload: address });
+      dispatch({ type: 'set-account-id', payload: accountId });
 
       console.log('[WebZjs] ✅ Address:', address);
-
-      // Get initial balance
-      try {
-        const balance = await wallet.get_balance(accountId);
-        dispatch({ type: 'set-balance', payload: balance });
-      } catch (err) {
-        console.warn('[WebZjs] Could not get balance:', err);
-      }
+      console.log('[WebZjs] Account ID:', accountId);
 
       return { accountId, address };
     },
     [state.isInitialized, initializeWebZjs]
   );
+
+  /**
+   * Sync wallet with blockchain
+   * This fetches all transactions and updates balance
+   */
+  const syncWallet = useCallback(async () => {
+    if (!state.webWallet || state.accountId === null) {
+      console.warn('[WebZjs] Cannot sync: wallet not initialized');
+      return;
+    }
+
+    if (state.isSyncing) {
+      console.log('[WebZjs] Sync already in progress, skipping...');
+      return;
+    }
+
+    try {
+      dispatch({ type: 'set-syncing', payload: true });
+      console.log('[WebZjs] 🔄 Syncing wallet...');
+
+      // Sync with blockchain
+      await state.webWallet.sync();
+
+      // Get updated balance
+      const balance = await state.webWallet.get_balance(state.accountId);
+      dispatch({ type: 'set-balance', payload: balance });
+      dispatch({ type: 'set-last-sync-time', payload: Date.now() });
+
+      const zec = Number(balance) / 100_000_000;
+      console.log('[WebZjs] ✅ Sync complete! Balance:', zec, 'ZEC');
+    } catch (error) {
+      console.error('[WebZjs] Sync failed:', error);
+      // Don't set error, just log it (sync failures are common)
+    } finally {
+      dispatch({ type: 'set-syncing', payload: false });
+    }
+  }, [state.webWallet, state.accountId, state.isSyncing]);
 
   /**
    * Get current address
@@ -217,11 +264,35 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
     [state.webWallet]
   );
 
+  // Auto-sync every 30 seconds when wallet is initialized
+  useEffect(() => {
+    if (!state.webWallet || state.accountId === null) {
+      return;
+    }
+
+    console.log('[WebZjs] Starting auto-sync (every 30s)...');
+
+    // Initial sync
+    syncWallet();
+
+    // Set up interval for periodic sync
+    const intervalId = setInterval(() => {
+      console.log('[WebZjs] Auto-sync triggered');
+      syncWallet();
+    }, 30000); // 30 seconds
+
+    return () => {
+      console.log('[WebZjs] Stopping auto-sync');
+      clearInterval(intervalId);
+    };
+  }, [state.webWallet, state.accountId, syncWallet]);
+
   const value: WebZjsContextType = {
     state,
     dispatch,
     initializeWebZjs,
     createWalletFromSeed,
+    syncWallet,
     getAddress,
     getBalance,
   };

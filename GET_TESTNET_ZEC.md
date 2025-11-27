@@ -92,4 +92,3 @@ console.log(`Balance: ${zec} ZEC`);
 ---
 
 **Tu veux qu'on implémente le sync maintenant pour voir ton balance quand tu reçois du ZEC ?** 🚀
-

@@ -10,7 +10,7 @@ export function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  const { state: webzjsState, createWalletFromSeed, initializeWebZjs } = useWebZjs();
+  const { state: webzjsState, createWalletFromSeed, initializeWebZjs, syncWallet } = useWebZjs();
 
   useEffect(() => {
     const initWallet = async () => {
@@ -61,12 +61,25 @@ export function Home() {
 
   const address = isLoading ? 'Loading...' : (walletAddress || 'No address');
 
+  // Format balance: zatoshis → ZEC
+  const formatBalance = (zatoshis: bigint): string => {
+    const zec = Number(zatoshis) / 100_000_000;
+    return zec.toFixed(8).replace(/\.?0+$/, ''); // Remove trailing zeros
+  };
+
+  const balance = formatBalance(webzjsState.balance);
+  const balanceUSD = (parseFloat(balance) * 45).toFixed(2); // Mock ZEC price
+
   const handleCopyAddress = async () => {
     if (address) {
       await navigator.clipboard.writeText(address);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const handleRefresh = () => {
+    syncWallet();
   };
 
   const formatAddress = (addr: string) => {
@@ -87,10 +100,19 @@ export function Home() {
             <span className="text-xs text-cipher-orange bg-cipher-orange/10 px-2 py-1 rounded">
               TESTNET
             </span>
-            <button className="p-2 hover:bg-cipher-border rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <button 
+              onClick={handleRefresh}
+              disabled={webzjsState.isSyncing}
+              className="p-2 hover:bg-cipher-border rounded-lg transition-colors disabled:opacity-50"
+              title="Sync wallet"
+            >
+              <svg 
+                className={`w-5 h-5 ${webzjsState.isSyncing ? 'animate-spin' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
           </div>
@@ -123,8 +145,22 @@ export function Home() {
           {/* Balance Card */}
           <div className="bg-cipher-surface border border-cipher-border rounded-xl p-6 text-center">
             <p className="text-sm text-gray-400 mb-2">Total Balance</p>
-            <p className="text-4xl font-bold text-cipher-cyan mb-1">0.00 ZEC</p>
-            <p className="text-sm text-gray-500">≈ $0.00 USD</p>
+            {webzjsState.isSyncing && webzjsState.balance === 0n ? (
+              <div className="flex items-center justify-center space-x-2 h-12">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cipher-cyan"></div>
+                <span className="text-cipher-text-light">Syncing...</span>
+              </div>
+            ) : (
+              <>
+                <p className="text-4xl font-bold text-cipher-cyan mb-1">{balance} ZEC</p>
+                <p className="text-sm text-gray-500">≈ ${balanceUSD} USD</p>
+              </>
+            )}
+            {webzjsState.lastSyncTime && (
+              <p className="text-gray-600 text-xs mt-2">
+                Last synced: {new Date(webzjsState.lastSyncTime).toLocaleTimeString()}
+              </p>
+            )}
           </div>
 
           {/* Action Buttons */}

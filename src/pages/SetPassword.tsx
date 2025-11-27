@@ -57,10 +57,10 @@ export function SetPassword() {
 
     try {
       console.log('[SetPassword] Creating encrypted vault...');
-      
+
       // Import secure storage
       const { createVault } = await import('@/lib/storage/secure-storage');
-      
+
       // Create encrypted vault
       await createVault(password, {
         seedPhrase: seedPhrase,
@@ -68,11 +68,11 @@ export function SetPassword() {
         birthdayHeight: birthdayHeight,
         createdAt: Date.now(),
       });
-      
+
       console.log('[SetPassword] Vault created successfully!');
       console.log('[SetPassword] Seed is encrypted with AES-256-GCM');
       console.log('[SetPassword] Password is NOT stored (only encryption key derived from it)');
-      
+
       // Navigate to home
       navigateTo('home');
     } catch (err) {

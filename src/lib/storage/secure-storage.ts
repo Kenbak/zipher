@@ -1,10 +1,10 @@
 /**
  * Secure Storage with AES-256-GCM Encryption
- * 
+ *
  * This module handles encryption/decryption of sensitive data (seed phrases)
  * using Web Crypto API. The encryption key is derived from the user's password
  * using PBKDF2.
- * 
+ *
  * Security model (same as MetaMask, Phantom, Rabby):
  * 1. Password is NEVER stored
  * 2. Password → PBKDF2 → Encryption Key (in memory only)
@@ -243,7 +243,7 @@ export async function unlockVault(password: string): Promise<VaultData> {
  */
 export function lockVault(): void {
   sessionVault = null;
-  
+
   if (sessionTimeout) {
     clearTimeout(sessionTimeout);
     sessionTimeout = null;
@@ -305,4 +305,3 @@ export async function deleteVault(): Promise<void> {
   lockVault();
   console.log('[SecureStorage] Vault deleted');
 }
-

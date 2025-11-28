@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAppStore } from '@/lib/storage/store';
 import { unlockVault } from '@/lib/storage/secure-storage';
 
@@ -8,6 +8,10 @@ export function Unlock() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isUnlocking, setIsUnlocking] = useState(false);
+
+  // Logo tilt effect
+  const logoRef = useRef<HTMLImageElement>(null);
+  const [logoTransform, setLogoTransform] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg)');
 
   const handleUnlock = async () => {
     setError('');
@@ -53,6 +57,35 @@ export function Unlock() {
     }
   };
 
+  const handleLogoMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!logoRef.current) return;
+
+    const rect = logoRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const mouseX = e.clientX - centerX;
+    const mouseY = e.clientY - centerY;
+
+    // Calculate rotation angles with high sensitivity
+    const rotateY = (mouseX / 150) * 25; // Left-right tilt
+    const rotateX = -(mouseY / 150) * 25; // Up-down tilt
+
+    // Clamp values to max ±25 degrees
+    const clampedRotateY = Math.max(-25, Math.min(25, rotateY));
+    const clampedRotateX = Math.max(-25, Math.min(25, rotateX));
+
+    console.log('[Tilt]', { rotateX: clampedRotateX, rotateY: clampedRotateY }); // Debug
+
+    setLogoTransform(
+      `perspective(600px) rotateX(${clampedRotateX}deg) rotateY(${clampedRotateY}deg)`
+    );
+  };
+
+  const handleLogoMouseLeave = () => {
+    setLogoTransform('perspective(600px) rotateX(0deg) rotateY(0deg)');
+  };
+
   return (
     <div className="min-h-screen bg-cipher-bg text-white flex flex-col">
       {/* Header */}
@@ -67,13 +100,22 @@ export function Unlock() {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm space-y-12">
+        <div
+          className="w-full max-w-sm space-y-12"
+          onMouseMove={handleLogoMouseMove}
+          onMouseLeave={handleLogoMouseLeave}
+        >
           {/* Logo */}
           <div className="text-center">
             <img
+              ref={logoRef}
               src="/icons/zipher_logo.png"
               alt="Zipher Logo"
-              className="w-32 h-32 mx-auto mb-4"
+              className="w-32 h-32 mx-auto mb-4 transition-transform duration-150 ease-out will-change-transform"
+              style={{
+                transform: logoTransform,
+                transformStyle: 'preserve-3d'
+              }}
             />
           </div>
 

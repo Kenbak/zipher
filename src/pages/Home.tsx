@@ -243,8 +243,8 @@ export function Home() {
 
           {/* Balance Card - Compact */}
           <div className="bg-cipher-surface border border-cipher-border rounded-2xl p-5">
-            <div className="flex items-center space-x-2 mb-3">
-              <p className="text-xs uppercase tracking-wide text-gray-500">Total Balance</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] uppercase tracking-wider font-medium text-gray-500">Total Balance</p>
               <button
                 onClick={() => setBalanceVisible(!balanceVisible)}
                 className="p-1 hover:bg-cipher-border rounded transition-colors"
@@ -268,24 +268,24 @@ export function Home() {
               </div>
             ) : (
               <>
-                <div className="flex items-center space-x-2 mb-2">
+                <div className="flex items-baseline space-x-2.5 mb-2">
                   {balanceVisible ? (
                     <>
-                      <p className="text-3xl font-bold text-white">{balance}</p>
-                      <div className="flex items-center space-x-2">
+                      <p className="text-4xl font-bold text-white leading-none">{balance}</p>
+                      <div className="flex items-center space-x-1.5 pb-0.5">
                         <img
                           src="/icons/zcash-logo.svg"
                           alt="Zcash"
-                          className="w-8 h-8"
+                          className="w-6 h-6 opacity-80"
                         />
-                        <span className="text-xl font-semibold text-white">ZEC</span>
+                        <span className="text-lg font-medium text-gray-400">ZEC</span>
                       </div>
                     </>
                   ) : (
-                    <p className="text-3xl font-bold text-white">••••••</p>
+                    <p className="text-4xl font-bold text-white leading-none">••••••</p>
                   )}
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 font-medium">
                   {balanceVisible ? `≈ $${balanceUSD} USD` : '≈ $•••• USD'}
                 </p>
               </>

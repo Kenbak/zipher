@@ -20,17 +20,8 @@ export function Unlock() {
     setIsUnlocking(true);
 
     try {
-      console.log('[Unlock] Attempting to unlock vault...');
-
       // Decrypt vault with password and get vault data
       const vaultData = await unlockVault(password);
-
-      console.log('[Unlock] ✅ Vault unlocked!');
-      console.log('[Unlock] Vault data:', {
-        hasSeed: !!vaultData.seedPhrase,
-        birthdayHeight: vaultData.birthdayHeight,
-        createdAt: vaultData.createdAt
-      });
 
       if (!vaultData?.seedPhrase) {
         throw new Error('Vault data invalid: no seed phrase');

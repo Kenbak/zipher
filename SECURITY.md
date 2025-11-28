@@ -44,7 +44,7 @@ If decrypt fails: password was wrong ❌
     ↓
 Seed phrase stays in RAM only (never written to disk)
     ↓
-Session active for 15 minutes (auto-lock)
+Session active for 5 minutes (auto-lock)
 ```
 
 ---
@@ -59,7 +59,7 @@ Session active for 15 minutes (auto-lock)
 | **Encryption** | AES-256-GCM | MetaMask, Phantom, Rabby |
 | **Salt** | 32-byte random salt per wallet | Industry standard |
 | **Key Storage** | Never stored (derived on-demand) | MetaMask, Phantom |
-| **Session Lock** | Auto-lock after 15min inactivity | MetaMask (default) |
+| **Session Lock** | Auto-lock after 5min inactivity | MetaMask-style |
 | **Memory-only** | Seed in RAM during session | All wallets |
 
 ### ❌ What We DON'T Do (By Design)

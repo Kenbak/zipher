@@ -238,8 +238,6 @@ async function saveSyncState(address: string, state: SyncState): Promise<void> {
  * Uses webzjs-keys (same as MetaMask Snap)
  */
 export function getViewingKeyFromSeed(seedPhrase: string, network: 'main' | 'test' = 'test', accountIndex: number = 0): string {
-  console.log('[ZcashSync] Generating viewing key from seed...');
-
   // Convert mnemonic to BIP39 seed (64 bytes)
   const bip39Seed = mnemonicToSeedSync(seedPhrase);
 
@@ -248,15 +246,12 @@ export function getViewingKeyFromSeed(seedPhrase: string, network: 'main' | 'tes
     ? bip39Seed
     : new Uint8Array(bip39Seed);
 
-  console.log('[ZcashSync] BIP39 seed derived, length:', seedBytes.length, 'bytes');
-
   // Generate UnifiedSpendingKey
   const spendingKey = new UnifiedSpendingKey(network, seedBytes, accountIndex);
 
   // Get Unified Full Viewing Key
   const viewingKey = spendingKey.to_unified_full_viewing_key().encode(network);
 
-  console.log('[ZcashSync] ✅ Viewing key generated');
   return viewingKey;
 }
 
@@ -307,7 +302,6 @@ export async function syncWallet(
     console.warn('[ZcashSync] Starting from:', startHeight, '(current -1000 blocks)');
   }
 
-  console.log('[ZcashSync] Previous balance:', prevState?.balance || 0, 'ZEC');
 
   // 3. Generate viewing key from seed
   const viewingKey = getViewingKeyFromSeed(seedPhrase);
@@ -380,7 +374,6 @@ export async function syncWallet(
       });
 
       totalReceived += decrypted.amount;
-      console.log(`[ZcashSync] ✅ TX ${displayTxid.slice(0, 8)}... : +${decrypted.amount} ZEC (memo: "${decrypted.memo}")`);
     } catch (error) {
       console.error(`[ZcashSync] Failed to decrypt ${reverseTxid(match.txid)}:`, error);
     }
@@ -401,8 +394,7 @@ export async function syncWallet(
     last_sync_time: Date.now(),
   });
 
-  console.log('[ZcashSync] ✅ Balance:', finalBalance, 'ZEC');
-  console.log('[ZcashSync] Transactions:', allTxs.length);
+  console.log('[ZcashSync] ✅ Sync complete');
   console.log('[ZcashSync] 💾 Checkpoint saved at height', currentHeight);
 
   return {
@@ -412,7 +404,6 @@ export async function syncWallet(
     transactions: allTxs,
   };
 }
-}
 
 /**
  * Decrypt a single transaction memo
@@ -420,9 +411,10 @@ export async function syncWallet(
 export async function decryptTransactionMemo(
   txHex: string,
   viewingKey: string
-): Promise<DecryptedOutput> {
-  await initZcashWasm();
-
-  const resultJson = decrypt_memo(txHex, viewingKey);
-  return JSON.parse(resultJson);
+): Promise<{ memo: string; amount: number }> {
+  const result = await decryptMemo(txHex, viewingKey);
+  return {
+    memo: result.memo,
+    amount: result.amount
+  };
 }

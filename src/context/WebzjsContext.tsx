@@ -202,15 +202,12 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
         birthdayHeight || null
       );
 
-      console.log('[WebZjs] Account created, ID:', accountId);
-
       // Get address
       const address = await wallet.get_current_address(accountId);
       dispatch({ type: 'set-address', payload: address });
       dispatch({ type: 'set-account-id', payload: accountId });
 
-      console.log('[WebZjs] ✅ Address:', address);
-      console.log('[WebZjs] Account ID:', accountId);
+      console.log('[WebZjs] ✅ Wallet created');
 
       return { accountId, address };
     },
@@ -267,8 +264,7 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
       dispatch({ type: 'set-last-sync-time', payload: Date.now() });
       dispatch({ type: 'reset-sync-fail-count' }); // Reset on success
 
-      console.log('[WebZjs] ✅ Sync complete! Balance:', walletBalance.balance, 'ZEC');
-      console.log('[WebZjs] Transactions:', walletBalance.transactions.length);
+      console.log('[WebZjs] ✅ Sync complete!');
     } catch (error) {
       console.error('[WebZjs] Sync failed:', error);
       dispatch({ type: 'increment-sync-fail-count' });
@@ -317,7 +313,7 @@ export const WebZjsProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Wallet not initialized');
       }
 
-      console.log('[WebZjs] Sending transaction:', { toAddress, amount, memo });
+      console.log('[WebZjs] Sending transaction...');
 
       try {
         // Get seed phrase from secure storage

@@ -13,6 +13,8 @@
  * 5. On unlock: password → PBKDF2 → key → decrypt seed
  */
 
+import { logWithTag, logError } from '@/lib/logger';
+
 // Constants for PBKDF2
 const PBKDF2_ITERATIONS = 600_000; // OWASP recommendation (2023)
 const PBKDF2_KEY_LENGTH = 256; // 256 bits for AES-256
@@ -49,7 +51,7 @@ export interface VaultData {
 let sessionVault: VaultData | null = null;
 let sessionTimeout: NodeJS.Timeout | null = null;
 
-const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes (reduced for security)
 
 /**
  * Generate a random salt
@@ -199,7 +201,7 @@ export async function createVault(
   sessionVault = vaultData;
   startSessionTimer();
 
-  console.log('[SecureStorage] Vault created and locked successfully');
+  logWithTag('SecureStorage', 'Vault created and encrypted');
 }
 
 /**
@@ -231,10 +233,10 @@ export async function unlockVault(password: string): Promise<VaultData> {
     sessionVault = vaultData;
     startSessionTimer();
 
-    console.log('[SecureStorage] Vault unlocked successfully');
+    logWithTag('SecureStorage', 'Vault unlocked successfully');
     return vaultData;
   } catch (error) {
-    console.error('[SecureStorage] Failed to decrypt vault:', error);
+    logError('[SecureStorage] Failed to decrypt vault', error);
     throw new Error('Incorrect password');
   }
 }
@@ -250,7 +252,7 @@ export function lockVault(): void {
     sessionTimeout = null;
   }
 
-  console.log('[SecureStorage] Vault locked');
+  logWithTag('SecureStorage', 'Vault locked');
 }
 
 /**
@@ -284,7 +286,7 @@ function startSessionTimer(): void {
   }
 
   sessionTimeout = setTimeout(() => {
-    console.log('[SecureStorage] Session timed out');
+    logWithTag('SecureStorage', 'Session timed out - auto-locking');
     lockVault();
   }, SESSION_TIMEOUT_MS);
 }

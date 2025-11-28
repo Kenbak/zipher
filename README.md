@@ -131,9 +131,8 @@ Ziphers is built by the same team behind [CipherScan](https://cipherscan.app), t
 ## 📚 Documentation
 
 - [Project Overview](PROJECT.md) - Full vision and architecture
-- [Development Guide](docs/DEVELOPMENT.md) - For contributors
-- [API Reference](docs/API.md) - For dApp developers
-- [Security Policy](docs/SECURITY.md) - Vulnerability disclosure
+- [Security Policy](SECURITY.md) - Encryption and security details
+- [Architecture](ARCHITECTURE.md) - Technical architecture
 
 ---
 
@@ -159,7 +158,7 @@ Get testnet ZEC for free: https://testnet.zecfaucet.com/
 
 ## 🤝 Contributing
 
-We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+We welcome contributions!
 
 ### Development Setup
 
@@ -170,11 +169,8 @@ npm install
 # Start dev server
 npm run dev
 
-# Run type check
-npm run type-check
-
-# Run linter
-npm run lint
+# Build extension
+npm run build
 ```
 
 ### Reporting Bugs

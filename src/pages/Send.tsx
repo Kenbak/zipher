@@ -37,23 +37,61 @@ export function Send() {
       return;
     }
 
-    // Validate Zcash address (basic check)
-    if (!recipient.startsWith('u') && !recipient.startsWith('zs') && !recipient.startsWith('ztestsapling')) {
-      setError('Invalid Zcash address');
+    // Strict Zcash address validation
+    const isValidAddress = (addr: string): boolean => {
+      // Remove whitespace
+      const trimmed = addr.trim();
+
+      // Unified addresses (testnet)
+      if (trimmed.startsWith('utest1')) {
+        // Validate length (140-180 chars typical)
+        if (trimmed.length < 140 || trimmed.length > 180) return false;
+        // Validate bech32 characters (alphanumeric excluding "1", "b", "i", "o")
+        if (!/^utest1[a-z0-9]{134,174}$/i.test(trimmed)) return false;
+        return true;
+      }
+
+      // Unified addresses (mainnet)
+      if (trimmed.startsWith('u1')) {
+        if (trimmed.length < 140 || trimmed.length > 180) return false;
+        if (!/^u1[a-z0-9]{138,178}$/i.test(trimmed)) return false;
+        return true;
+      }
+
+      // Sapling addresses (testnet)
+      if (trimmed.startsWith('ztestsapling1')) {
+        // Exact 78 characters for Sapling
+        if (trimmed.length !== 78) return false;
+        // Bech32 validation
+        if (!/^ztestsapling1[a-z0-9]{64}$/.test(trimmed)) return false;
+        return true;
+      }
+
+      // Sapling addresses (mainnet)
+      if (trimmed.startsWith('zs1')) {
+        if (trimmed.length !== 78) return false;
+        if (!/^zs1[a-z0-9]{75}$/.test(trimmed)) return false;
+        return true;
+      }
+
+      return false;
+    };
+
+    if (!isValidAddress(recipient)) {
+      setError('Invalid Zcash address. Please enter a valid unified (u1/utest1) or Sapling (zs1/ztestsapling1) address.');
       return;
     }
 
     setIsSending(true);
 
     try {
-      console.log('[Send] Sending transaction...');
       const resultTxid = await sendTransaction(
         recipient,
         parseFloat(amount),
         memo || undefined
       );
 
-      console.log('[Send] ✅ Transaction sent! TXID:', resultTxid);
+      console.log('[Send] ✅ Transaction sent!');
       setTxid(resultTxid);
 
       // Clear form

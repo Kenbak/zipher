@@ -16,7 +16,7 @@ export function Home() {
   const [transactions, setTransactions] = useState<DecryptedTransaction[]>([]);
   const [balanceVisible, setBalanceVisible] = useState(true);
 
-  const { state: webzjsState, createWalletFromSeed, initializeWebZjs } = useWebZjs();
+  const { state: webzjsState, createWalletFromSeed, initializeWebZjs, syncWallet } = useWebZjs();
 
   // Load transactions from sync state
   useEffect(() => {
@@ -61,7 +61,7 @@ export function Home() {
     }
 
     if (webzjsState.currentAddress) {
-      console.log('[Home] Address already available:', webzjsState.currentAddress);
+      console.log('[Home] Address already loaded');
       setAddress(webzjsState.currentAddress);
       setIsLoading(false);
       return;
@@ -83,15 +83,15 @@ export function Home() {
           vault.accountName || 'Account 1',
           vault.seedPhrase,
           0,
-          vault.birthdayHeight || null
+          vault.birthdayHeight || undefined
         );
 
-        console.log('[Home] ✅ Address generated:', result.address);
+        console.log('[Home] ✅ Wallet loaded successfully');
         setAddress(result.address);
 
         // Start custom WASM sync in background
         console.log('[Home] Starting background sync...');
-        customSync(vault.seedPhrase, result.address, vault.birthdayHeight, vault.createdAt)
+        customSync(vault.seedPhrase, result.address, vault.birthdayHeight ?? undefined, vault.createdAt)
           .then(syncState => {
             console.log('[Home] ✅ Sync complete:', syncState);
           })

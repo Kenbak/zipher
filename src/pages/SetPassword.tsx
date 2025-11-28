@@ -57,8 +57,6 @@ export function SetPassword() {
     setIsCreating(true);
 
     try {
-      console.log('[SetPassword] Step 1/3: Creating encrypted vault...');
-
       // Import secure storage
       const { createVault } = await import('@/lib/storage/secure-storage');
 
@@ -70,10 +68,7 @@ export function SetPassword() {
         createdAt: Date.now(),
       });
 
-      console.log('[SetPassword] ✅ Vault created (seed encrypted with AES-256-GCM)');
-
-      console.log('[SetPassword] Step 2/3: Password set, navigating to home...');
-      console.log('[SetPassword] Wallet will be initialized on Home screen');
+      console.log('[SetPassword] ✅ Wallet created successfully');
 
       // Navigate to home
       navigateTo('home');

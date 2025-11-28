@@ -2,75 +2,64 @@
 
 ## 🎯 Vision
 
-**Ziphers** est une extension de wallet Zcash pour navigateur (Chrome/Brave/Edge) qui permet aux utilisateurs de gérer leurs ZEC de manière privée et sécurisée, directement depuis leur navigateur.
+**Ziphers** is a browser extension wallet for Zcash (Chrome/Brave/Edge) that enables users to manage their ZEC privately and securely, directly from their browser.
 
-Similaire à **Leather** (Bitcoin) ou **Unisat**, mais pour **Zcash** avec un focus sur la **privacy**.
+Similar to **Leather** (Bitcoin) or **Unisat**, but for **Zcash** with a focus on **privacy**.
 
 ---
 
-## 🏗️ Architecture Technique
+## 🏗️ Technical Architecture
 
 ### Stack
 
 - **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS (même style que CipherScan explorer)
+- **Styling**: Tailwind CSS (CipherScan design system)
 - **Wallet Core**: [WebZjs](https://github.com/ChainSafe/WebZjs) by ChainSafe
 - **Extension**: Chrome Extension Manifest V3
 - **Storage**: Chrome Storage API (encrypted)
 - **State**: Zustand
 
-### Backend/Infrastructure (Réutilisé de CipherScan!)
+### Backend/Infrastructure
 
 - **Lightwalletd gRPC**: `https://zcash-testnet.chainsafe.dev` (ChainSafe proxy)
-- **Backup Lightwalletd**: Notre propre instance sur `testnet.cipherscan.app:9067`
-- **Block Explorer API**: `https://testnet.cipherscan.app/api` pour enrichir les données
-- **Network**: Testnet d'abord, Mainnet plus tard
+- **Block Explorer API**: `https://testnet.cipherscan.app/api` for enriched data
+- **Network**: Testnet initially, Mainnet after security audit
 
 ---
 
-## ✨ Features (MVP - 4 semaines)
+## ✨ Features
 
-### Phase 1: Onboarding (Week 1)
-- [ ] Créer nouveau wallet (seed BIP39 24 mots)
-- [ ] Importer wallet existant (depuis seed)
-- [ ] Setup password pour encryption
-- [ ] Secure storage (seed encrypted dans Chrome storage)
-- [ ] Backup seed phrase (export/print)
+### Core Wallet Features
+- [x] Create wallet (24-word BIP39 seed phrase)
+- [x] Import existing wallet
+- [x] Password-based encryption
+- [x] Secure storage (encrypted seed in Chrome storage)
+- [x] Display balance (Shielded + Transparent)
+- [x] Generate Unified Addresses (UA)
+- [x] Address display with QR code
+- [x] Transaction history with decrypted memos
+- [x] Send transactions (shielded)
+- [x] Address validation (UA, Sapling, Transparent)
+- [x] Transaction confirmation UI
+- [x] Settings page
+- [x] Wallet reset/delete
 
-### Phase 2: Core Wallet (Week 2)
-- [ ] Afficher balance (Shielded + Transparent)
-- [ ] Génération Unified Address (UA)
-- [ ] Afficher adresse avec QR code
-- [ ] Transaction history (avec memos déchiffrés!)
-- [ ] Background sync (WebZjs sync dans service worker)
-- [ ] Network status indicator
-
-### Phase 3: Send Transactions (Week 3)
-- [ ] Interface Send (to address, amount, memo)
-- [ ] Validation d'adresse (UA, Sapling, Transparent)
-- [ ] Sélection transparent vs shielded
-- [ ] Calcul de fees automatique
-- [ ] Sign + Broadcast transaction
-- [ ] Transaction confirmation UI
-- [ ] Scan QR code pour address destination
-
-### Phase 4: Polish (Week 4)
-- [ ] Settings page (network, lightwalletd URL, etc.)
-- [ ] Delete/Reset wallet
-- [ ] Error handling + retry logic
-- [ ] Loading states + animations
-- [ ] Testnet faucet integration (bouton "Get Testnet ZEC")
-- [ ] Transaction details modal (link to CipherScan explorer)
-- [ ] Dark mode (déjà par défaut)
+### Roadmap
+- [ ] Mainnet support (post-audit)
+- [ ] Multiple accounts
+- [ ] Contact book
+- [ ] Hardware wallet support (Ledger)
+- [ ] dApp connector API
+- [ ] Multi-language support
 
 ---
 
 ## 🎨 Design System
 
 ### Branding
-- **Nom**: Ziphers
+- **Name**: Ziphers
 - **Tagline**: "Privacy-First Zcash Wallet by CipherScan"
-- **Colors**: Réutilise la palette CipherScan
+- **Colors**: CipherScan palette
   - Primary: `cipher-cyan` (#00D9FF)
   - Secondary: `cipher-green` (#00FF94)
   - Background: `cipher-bg` (#0A0E17)
@@ -78,37 +67,38 @@ Similaire à **Leather** (Bitcoin) ou **Unisat**, mais pour **Zcash** avec un fo
   - Border: `cipher-border` (#1E2A47)
 
 ### UI/UX
-- Minimaliste, pro, focus privacy
-- Inspiré de: Leather, MetaMask, Phantom
-- Animations subtiles
-- Feedback clair pour toutes les actions
-- **Mobile-first** design (extension popup = petit écran)
+- Minimalist, professional, privacy-focused
+- Inspired by: Leather, MetaMask, Phantom
+- Subtle animations
+- Clear feedback for all actions
+- **Mobile-first** design (extension popup = small screen)
 
 ---
 
-## 🔐 Sécurité
+## 🔐 Security
 
-### Stockage
-- Seed phrase: **Encrypted** avec password user (AES-256-GCM)
-- Keys jamais en clair dans storage
-- Password jamais stocké (dérivé avec PBKDF2)
+### Storage
+- Seed phrase: **Encrypted** with user password (AES-256-GCM)
+- Keys never stored in plaintext
+- Password never stored (derived with PBKDF2)
+- Session timeout after 5 minutes
 
 ### Permissions
-- **Minimal permissions** (storage + activeTab seulement)
-- Pas d'accès réseau broad (seulement lightwalletd URLs)
-- Content script **read-only** par défaut
+- **Minimal permissions** (storage + alarms only)
+- No broad network access (only lightwalletd URLs)
+- Content script **read-only** by default
 
 ### Audit
-- Code open-source
-- WebZjs déjà audité par ChainSafe
-- Pas de analytics/tracking
-- Pas de serveur central (tout client-side)
+- Open source code
+- WebZjs audited by ChainSafe
+- No analytics/tracking
+- No central server (fully client-side)
 
 ---
 
-## 🔗 Intégration CipherScan
+## 🔗 CipherScan Integration
 
-### API Endpoints Utilisés
+### API Endpoints
 ```
 https://testnet.cipherscan.app/api/
 ├─ /tx/:txid              # Transaction details
@@ -119,77 +109,65 @@ https://testnet.cipherscan.app/api/
 
 ### Lightwalletd
 ```
-Primaire: https://zcash-testnet.chainsafe.dev (gRPC-web proxy)
-Backup:   ws://testnet.cipherscan.app:9067 (notre instance)
+Primary: https://zcash-testnet.chainsafe.dev (gRPC-web proxy)
 ```
 
-### Liens Explorer
-- Click sur transaction → Ouvre `testnet.cipherscan.app/tx/:txid`
-- Click sur block → Ouvre `testnet.cipherscan.app/block/:height`
-- Branding "Powered by CipherScan"
+### Explorer Links
+- Click on transaction → Opens `testnet.cipherscan.app/tx/:txid`
+- Click on block → Opens `testnet.cipherscan.app/block/:height`
+- "Powered by CipherScan" branding
 
 ---
 
-## 📁 Structure du Projet
+## 📁 Project Structure
 
 ```
 zcash-wallet-extension/
 ├── manifest.json                    # Extension config
 ├── public/
-│   ├── icons/                       # Ziphers logo (16, 48, 128px)
-│   └── index.html
+│   └── icons/                       # Ziphers logo (16, 48, 128px)
 │
 ├── src/
 │   ├── popup/                       # Extension UI (React)
 │   │   ├── App.tsx
-│   │   ├── pages/
-│   │   │   ├── Onboarding/
-│   │   │   │   ├── Welcome.tsx
-│   │   │   │   ├── CreateWallet.tsx
-│   │   │   │   ├── ImportWallet.tsx
-│   │   │   │   └── SetPassword.tsx
-│   │   │   ├── Home.tsx            # Balance + recent txs
-│   │   │   ├── Send.tsx            # Send form
-│   │   │   ├── Receive.tsx         # Show address + QR
-│   │   │   ├── Transactions.tsx    # Full tx history
-│   │   │   └── Settings.tsx        # App settings
-│   │   └── components/
-│   │       ├── Balance.tsx
-│   │       ├── TransactionCard.tsx
-│   │       ├── AddressDisplay.tsx
-│   │       ├── QRCode.tsx
-│   │       └── SendForm.tsx
+│   │   └── main.tsx
+│   │
+│   ├── pages/
+│   │   ├── Welcome.tsx             # Onboarding
+│   │   ├── CreateWallet.tsx
+│   │   ├── ImportWallet.tsx
+│   │   ├── SetPassword.tsx
+│   │   ├── Unlock.tsx
+│   │   ├── Home.tsx                # Balance + recent txs
+│   │   ├── Send.tsx                # Send form
+│   │   ├── Receive.tsx             # Show address + QR
+│   │   └── Settings.tsx            # App settings
+│   │
+│   ├── context/
+│   │   └── WebzjsContext.tsx       # WebZjs wallet manager
 │   │
 │   ├── background/                  # Service Worker
-│   │   ├── service-worker.ts       # Background tasks
-│   │   ├── wallet-manager.ts       # WebZjs wallet instance
-│   │   └── sync-manager.ts         # Periodic sync
+│   │   └── service-worker.ts       # Background tasks
 │   │
 │   ├── content/                     # Content scripts
-│   │   └── inject.ts               # window.zcash API for dApps
+│   │   └── content-script.ts       # window.zcash API for dApps
 │   │
 │   ├── lib/
-│   │   ├── webzjs/
-│   │   │   ├── wallet.ts           # WebZjs wrapper
-│   │   │   ├── transactions.ts     # Send/receive logic
-│   │   │   └── sync.ts             # Blockchain sync
 │   │   ├── storage/
 │   │   │   ├── secure-storage.ts   # Encrypted storage
-│   │   │   └── wallet-state.ts     # Zustand store
+│   │   │   └── store.ts            # Zustand store
 │   │   ├── api/
-│   │   │   ├── cipherscan.ts       # CipherScan API client
-│   │   │   └── lightwalletd.ts     # Lightwalletd client
-│   │   └── utils/
-│   │       ├── crypto.ts           # Encryption helpers
-│   │       ├── format.ts           # ZEC formatting
-│   │       └── validation.ts       # Address validation
+│   │   │   └── cipherscan.ts       # CipherScan API client
+│   │   ├── zcash-sync.ts           # Blockchain sync
+│   │   └── wasm-loader.ts          # WASM helpers
 │   │
-│   └── types/
-│       ├── wallet.ts
-│       ├── transaction.ts
-│       └── network.ts
+│   ├── types/
+│   │   └── ...
+│   │
+│   └── styles/
+│       └── index.css                # Tailwind + custom styles
 │
-├── tailwind.config.js               # Same as CipherScan
+├── tailwind.config.js               # CipherScan design system
 ├── vite.config.ts                   # Vite + Extension plugin
 ├── tsconfig.json
 ├── package.json
@@ -198,7 +176,7 @@ zcash-wallet-extension/
 
 ---
 
-## 🚀 Commandes de Développement
+## 🚀 Development Commands
 
 ```bash
 # Install dependencies
@@ -216,9 +194,6 @@ npm run build
 # 3. Click "Load unpacked"
 # 4. Select the /dist folder
 
-# Watch mode (rebuild on changes)
-npm run watch
-
 # Type check
 npm run type-check
 
@@ -228,7 +203,7 @@ npm run lint
 
 ---
 
-## 🧪 Testing Plan
+## 🧪 Testing
 
 ### Manual Testing
 1. Create wallet → Verify seed backup
@@ -238,14 +213,14 @@ npm run lint
 5. Receive → Check balance update
 6. Restart extension → Verify persistence
 
-### Automated Testing (Later)
-- Unit tests pour crypto functions
-- Integration tests pour WebZjs wrapper
-- E2E tests avec Playwright
+### Browser Compatibility
+- ✅ Chrome 88+
+- ✅ Brave 1.20+
+- ✅ Edge 88+
 
 ---
 
-## 📦 Dependencies Principales
+## 📦 Main Dependencies
 
 ```json
 {
@@ -256,8 +231,7 @@ npm run lint
     "react-dom": "^18.3.0",
     "zustand": "^4.5.0",
     "qrcode": "^1.5.0",
-    "bip39": "^3.1.0",
-    "@heroicons/react": "^2.0.0"
+    "bip39": "^3.1.0"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0",
@@ -274,53 +248,21 @@ npm run lint
 
 ---
 
-## 🎯 Success Metrics (MVP)
-
-- [ ] Wallet créé en < 1 minute
-- [ ] Sync complet en < 30 secondes (pour wallet jeune)
-- [ ] Transaction envoyée en < 10 secondes
-- [ ] UI responsive (< 100ms interactions)
-- [ ] Seed backup UX claire (utilisateur comprend l'importance)
-- [ ] 0 crashes durant testing phase
-- [ ] Compatible Chrome/Brave/Edge
-
----
-
-## 🔮 Post-MVP (Future)
-
-### Phase 2 Features
-- [ ] Support Mainnet (toggle testnet/mainnet)
-- [ ] Multiple accounts (account switching)
-- [ ] Contact book (saved addresses)
-- [ ] Transaction notes (user-added labels)
-- [ ] Export transaction history (CSV)
-- [ ] Fiat price display (via CoinGecko API)
-
-### Phase 3 Features
-- [ ] Hardware wallet support (Ledger)
-- [ ] dApp connector (window.zcash API)
-- [ ] WalletConnect integration
-- [ ] Multi-language support
-- [ ] Mobile app (React Native port)
-
----
-
-## 🤝 Liens avec CipherScan Ecosystem
+## 🤝 CipherScan Ecosystem
 
 ### Branding
 - "Powered by CipherScan"
-- Logo Ziphers distinct mais harmonieux avec CipherScan
-- Footer link vers cipherscan.app
+- Ziphers logo harmonizes with CipherScan design
+- Footer link to cipherscan.app
 
 ### Infrastructure
-- Utilise lightwalletd de CipherScan
-- Liens profonds vers explorer
-- Partage même design system
+- Uses CipherScan's lightwalletd
+- Deep links to explorer
+- Shares same design system
 
-### Marketing
-- Cross-promotion (CipherScan → Ziphers, Ziphers → CipherScan)
-- "Get Wallet" button sur CipherScan → Install Ziphers
-- "Explore on CipherScan" button dans Ziphers
+### Cross-Promotion
+- "Get Wallet" button on CipherScan → Install Ziphers
+- "Explore on CipherScan" button in Ziphers
 
 ---
 
@@ -345,36 +287,34 @@ npm run lint
 
 ## ⚠️ Important Notes
 
-1. **Testnet Only Initially**: Ne PAS supporter mainnet avant audit complet
-2. **No Analytics**: Respect user privacy, 0 tracking
-3. **Open Source**: Tout le code public sur GitHub
-4. **Security First**: Audit avant mainnet launch
-5. **User Education**: Expliquer seed phrase importance (UX!)
+1. **Testnet Only Initially**: No mainnet support before complete security audit
+2. **No Analytics**: Respects user privacy, zero tracking
+3. **Open Source**: All code public on GitHub
+4. **Security First**: Security audit before mainnet launch
+5. **User Education**: Clear explanation of seed phrase importance
 
 ---
 
 ## 🎉 Launch Plan
 
-### Beta (Month 1-2)
+### Beta Testing
 - Testnet only
-- Invite-only testing
-- Feedback loop avec early users
-- Itérations rapides
+- Limited distribution
+- Community feedback
+- Rapid iterations
 
-### Public Release (Month 3)
+### Public Release
 - Chrome Web Store submission
-- Blog post sur CipherScan
+- Blog post on CipherScan
 - Zcash Forum announcement
-- Social media (Twitter/X)
+- Social media announcements
 
-### Mainnet (Month 4+)
-- Security audit complet
+### Mainnet Support
+- Complete security audit
 - Bug bounty program
 - Gradual rollout
-- Monitoring dashboard
+- Monitoring and support
 
 ---
 
-**Last Updated**: 2025-11-27
-**Status**: 🟡 Initial Setup
-**Next Milestone**: Week 1 - Onboarding Complete
+**Built with 💚 for privacy**
